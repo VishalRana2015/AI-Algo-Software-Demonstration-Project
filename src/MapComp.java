@@ -5,166 +5,158 @@ import java.awt.event.*;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.*;
-public class MapComp extends JComponent implements Cloneable{
+
+public class MapComp extends JComponent implements Cloneable {
     @Override
     protected Object clone() throws CloneNotSupportedException {
-        MapComp comp = (MapComp) super.clone();
-        comp.group = (CellGroup) group.clone();
+        MapComp comp = new MapComp();
+        comp.group = (CellGroup) this.group.clone();
         if (cells != null) {
             comp.cells = new Cell[cells.length][cells[0].length];
             for (int i = 0; i < cells.length; i++) {
                 for (int j = 0; j < cells[0].length; j++) {
                     comp.cells[i][j] = (Cell) cells[i][j].clone();
+                    comp.cells[i][j].setGroup(group);
                 }
             }
         }
-        if (current != null)
-            comp.current = (Cell) current.clone();
         if (src != null)
-            comp.src = (Cell) src.clone();
+            comp.src = comp.cells[ this.src.row][this.src.col];
 
         if (dst != null)
-            comp.dst = (Cell) dst.clone();
+            comp.dst = comp.cells[this.dst.row][this.dst.col];
 
         comp.obstacles = new LinkedList<Cell>();
         if (obstacles != null) {
-
             for (int i = 0; i < obstacles.size(); i++) {
-                comp.obstacles.add((Cell) this.obstacles.get(i).clone());
+                Cell obstacle =obstacles.get(i);
+                comp.obstacles.add( comp.cells[obstacle.row][obstacle.col]);
             }
         }
-        /*comp.manager = new MapCompLayoutManager();
+        comp.manager = new MapCompLayoutManager();
         comp.setBackground(Color.BLACK);
         comp.changeListener =new Vector<ChangeListener>();
         comp.setLayout(manager);
         comp.setDim(rows,cols);
         comp.addMouseListener(listener);
-           */
-
-        comp.openset = new HashSet<Cell>();
-        if (openset != null) {
-
-            Iterator itr = openset.iterator();
-            while (itr.hasNext()) {
-                comp.openset.add((Cell) ((Cell) itr.next()).clone());
-            }
-        }
-        comp.closedset = new HashSet<Cell>();
-        if (closedset != null) {
-            Iterator itr = closedset.iterator();
-            while (itr.hasNext()) {
-                comp.openset.add((Cell) ((Cell) itr.next()).clone());
-            }
-        }
-
-        comp.pathset = new HashSet<Cell>();
-        if ( pathset != null) {
-            Iterator itr = pathset.iterator();
-            while (itr.hasNext()) {
-                comp.openset.add((Cell) ((Cell) itr.next()).clone());
-            }
-        }
-        return super.clone();
+        return comp;
     }
+
     private CellGroup group;
     private Cell[][] cells;
     private int rows, cols;
     private Cell current;
-    private Vector<ChangeListener> changeListener ;
+    private Vector<ChangeListener> changeListener;
     public static int SETOBSTACLEMODE = 1;
     public static int SETSRCMODE = 2;
     public static int SETDSTMODE = 3;
     MapCompMouseListener listener = new MapCompMouseListener();
     int mode;
     int delay = 500;
-    Cell src ;
-    Cell dst ;
-    LinkedList<Cell> obstacles  = new LinkedList<Cell>();
+    Cell src;
+    Cell dst;
+    LinkedList<Cell> obstacles = new LinkedList<Cell>();
     HashSet<Cell> openset = new HashSet<Cell>();
     HashSet<Cell> closedset = new HashSet<Cell>();
     HashSet<Cell> pathset = new HashSet<Cell>();
     private int indent;
     MapCompLayoutManager manager;
+    Thread thread;
 
-    public MapComp(){
+    public MapComp() {
 
     }
 
-    public void addToOpen( int crow, int ccol){
-        if ( (crow >= 0 && crow < rows ) & ( ccol >=0 && ccol < cols)) {
+    public void addToOpen(int crow, int ccol) {
+        printThread("Adding to open ");
+        printThread( "hashCode : "+ cells[crow][ccol].hashCode() + "comp.hashCode : "+ this.hashCode());
+        if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
             if (!openset.contains(cells[crow][ccol]))
                 openset.add(cells[crow][ccol]);
         }
         repaint();
     }
+    public void printThread(String str){
+        System.out.println(Thread.currentThread().getName() + str);
+    }
 
-    public void removeFromOpen( int crow, int ccol){
-        if ( (crow >= 0 && crow < rows ) & ( ccol >=0 && ccol < cols)) {
+    public void setThread(Thread thread){
+        this.thread = thread;
+    }
+    public void removeFromOpen(int crow, int ccol) {
+        printThread("removing from the open list");
+        printThread("hashCode " + cells[crow][ccol].hashCode()+ "comp.hashCode : "+ this.hashCode());
+        if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
             if (openset.contains(cells[crow][ccol]))
                 openset.remove(cells[crow][ccol]);
         }
         repaint();
     }
 
-    public void addToClose( int crow, int ccol){
-        if ( (crow >= 0 && crow < rows ) & ( ccol >=0 && ccol < cols)) {
+    public void addToClose(int crow, int ccol) {
+        printThread("addToClose method");
+        printThread("hashCode : "+ cells[crow][ccol].hashCode() + " comp.hashCode : "+ this.hashCode());
+        if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
             if (!closedset.contains(cells[crow][ccol]))
                 closedset.add(cells[crow][ccol]);
         }
         repaint();
     }
 
-    public void removeFromClose( int crow, int ccol){
-        if ( (crow >= 0 && crow < rows ) & ( ccol >=0 && ccol < cols)) {
+    public void removeFromClose(int crow, int ccol) {
+        if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
             if (openset.contains(cells[crow][ccol]))
                 openset.remove(cells[crow][ccol]);
         }
         repaint();
     }
 
-    public void addToPath( int crow, int ccol){
-        if ( (crow >= 0 && crow < rows ) & ( ccol >=0 && ccol < cols)) {
-            if ( !pathset.contains(cells[crow][ccol]))
+    public void addToPath(int crow, int ccol) {
+        if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
+            if (!pathset.contains(cells[crow][ccol]))
                 pathset.add(cells[crow][ccol]);
         }
         repaint();
     }
 
-    public void removeFromPath( int crow, int ccol){
-        if ( (crow >= 0 && crow < rows ) & ( ccol >=0 && ccol < cols)) {
+    public void removeFromPath(int crow, int ccol) {
+        if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
             if (pathset.contains(cells[crow][ccol]))
                 pathset.remove(cells[crow][ccol]);
         }
         repaint();
     }
 
-    public void setPath( int[] rowarray , int [] colarray){
+    public void setPath(int[] rowarray, int[] colarray) {
         pathset.clear();
         int nrow, ncol;
-        if (!( rowarray.length == colarray.length))
+        if (!(rowarray.length == colarray.length))
             return;
-        for ( int index = 0; index < rowarray.length ; index++){
+        for (int index = 0; index < rowarray.length; index++) {
             addToPath(rowarray[index], colarray[index]);
         }
     }
+
     private String status;
-    public String getStatus (){
+
+    public String getStatus() {
         return status;
     }
-    public void setStatus(){
+
+    public void setStatus(String status) {
         this.status = status;
     }
 
-    private  boolean editMode = false;
+    private boolean editMode = false;
 
-    MapComp( int rows, int cols){
+    MapComp(int rows, int cols) {
         indent = 2;
         group = new CellGroup();
         manager = new MapCompLayoutManager();
         this.setBackground(Color.BLACK);
-        changeListener =new Vector<ChangeListener>();
+        changeListener = new Vector<ChangeListener>();
         this.setLayout(manager);
-        this.setDim(rows,cols);
+        this.setDim(rows, cols);
         this.addMouseListener(listener);
     }
 
@@ -178,143 +170,161 @@ public class MapComp extends JComponent implements Cloneable{
 
     public void setEditMode(boolean editMode) {
         this.editMode = editMode;
-        if ( editMode == true)
-            this.setCursor( new Cursor(Cursor.CROSSHAIR_CURSOR));
+        if (editMode == true)
+            this.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
         else
-            this.setCursor(new Cursor( Cursor.DEFAULT_CURSOR));
+            this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
-    public void  setMode( int mode){
+
+    public void setMode(int mode) {
         // just for readability purpose
-        if (  mode == SETOBSTACLEMODE)
+        if (mode == SETOBSTACLEMODE)
             this.mode = SETOBSTACLEMODE;
-        if ( mode == SETSRCMODE)
+        if (mode == SETSRCMODE)
             this.mode = SETSRCMODE;
-        if ( mode == SETDSTMODE)
+        if (mode == SETDSTMODE)
             this.mode = SETDSTMODE;
     }
-    protected void addObstacle(Cell cell){
-        if ( cell == src )
-            src  = null;
-        if ( cell == dst )
-            dst =null;
-        if ( ! obstacles.contains(cell))
+
+    protected void addObstacle(Cell cell) {
+        if (cell == src)
+            src = null;
+        if (cell == dst)
+            dst = null;
+        if (!obstacles.contains(cell))
             obstacles.add(cell);
         repaint();
     }
-    public void addChangeListener( ChangeListener listener){
-        if( listener == null)
+
+    public void addChangeListener(ChangeListener listener) {
+        if (listener == null)
             return;
-        if ( changeListener.contains(listener))
+        if (changeListener.contains(listener))
             return;
         changeListener.add(listener);
     }
-    public void removeChangeListener ( ChangeListener listener){
-        if ( changeListener.contains(listener))
+
+    public void removeChangeListener(ChangeListener listener) {
+        if (changeListener.contains(listener))
             changeListener.remove(listener);
     }
 
     public void setCurrent(Point p) {
-        try{
-            this.current  = cells[(int)p.getX()][(int)p.getY()];
+        try {
+            this.current = cells[(int) p.getX()][(int) p.getY()];
             fireChangeListener();
-        }
-        catch( Exception e){
-            System.out.println("Exception  thrown :"+ e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Exception  thrown :" + e.getMessage());
         }
     }
 
     public Point getCurrentPosition() {
-        if ( this.current != null){
+        if (this.current != null) {
             int row, col;
-            col= current.getPosRow();
-            row =current.getPosCol();
+            col = current.getPosRow();
+            row = current.getPosCol();
             int x, y;
-            x  = ( this.indent*( row + 1) + row* this.group.getW() + this.group.getW()/2 ) ;
-            y= this.indent*(col+1) + col*this.group.getH() + this.group.getH()/2;
-            return new Point(x,y);
+            x = (this.indent * (row + 1) + row * this.group.getW() + this.group.getW() / 2);
+            y = this.indent * (col + 1) + col * this.group.getH() + this.group.getH() / 2;
+            return new Point(x, y);
         }
-        return new Point(0,0);
+        return new Point(0, 0);
     }
 
-    protected void fireChangeListener( ){
+    protected void fireChangeListener() {
         Iterator itr = changeListener.listIterator();
-        while( itr.hasNext()){
-            ChangeListener listener = (ChangeListener)itr.next();
+        while (itr.hasNext()) {
+            ChangeListener listener = (ChangeListener) itr.next();
             ChangeEvent e = new ChangeEvent(this);
             listener.stateChanged(e);
         }
     }
-    public void addCellToObstacles( int crow, int ccol){
-        if ( ( crow < 0 || crow > rows ) || ( ccol < 0 || ccol > cols)){
+
+    public void addCellToObstacles(int crow, int ccol) {
+        if ((crow < 0 || crow > rows) || (ccol < 0 || ccol > cols)) {
             return;
         }
-        if ( cells[crow][ccol] == src)
+        if (cells[crow][ccol] == src)
             src = null;
-        if ( cells[crow][ccol] == dst)
+        if (cells[crow][ccol] == dst)
             src = null;
-        if ( !obstacles.contains(cells[crow][ccol]))
+        if (!obstacles.contains(cells[crow][ccol]))
             obstacles.add(cells[crow][ccol]);
         repaint();
     }
-    public void removeCellFromObstacles( int crow, int ccol){
-        if ( (crow < 0 || crow > rows ) || ( ccol < 0 || ccol > cols)){
+
+    public void clear() {
+        openset.clear();
+        closedset.clear();
+        pathset.clear();
+        revalidate();
+    }
+
+    public void removeCellFromObstacles(int crow, int ccol) {
+        if ((crow < 0 || crow > rows) || (ccol < 0 || ccol > cols)) {
             return;
         }
-        if ( obstacles.contains(cells[crow][ccol]))
+        if (obstacles.contains(cells[crow][ccol]))
             obstacles.remove(cells[crow][ccol]);
         repaint();
     }
 
-    public void setSrc( int crow, int ccol){
-        if ( ( crow < 0 || crow > rows ) || ( ccol < 0 || ccol > cols)){
+    public void setSrc(int crow, int ccol) {
+        if ((crow < 0 || crow > rows) || (ccol < 0 || ccol > cols)) {
             return;
         }
-        if ( cells[crow][ccol] == dst)
-            dst =null;
-        if ( obstacles.contains(cells[crow][ccol]))
+        if (cells[crow][ccol] == dst)
+            dst = null;
+        if (obstacles.contains(cells[crow][ccol]))
             obstacles.remove(cells[crow][ccol]);
 
-       this.src = cells[crow][ccol];
-       repaint();
+        this.src = cells[crow][ccol];
+        repaint();
     }
-    public void setDst( int crow, int ccol){
-        if ( ( crow < 0 || crow > rows ) || ( ccol < 0 || crow > cols)){
+
+    public void setDst(int crow, int ccol) {
+        if ((crow < 0 || crow > rows) || (ccol < 0 || crow > cols)) {
             return;
         }
-        if ( src == cells[crow][ccol])
+        if (src == cells[crow][ccol])
             src = null;
-        if ( obstacles.contains(cells[crow][ccol]))
+        if (obstacles.contains(cells[crow][ccol]))
             obstacles.remove(cells[crow][ccol]);
         this.dst = cells[crow][ccol];
         repaint();
     }
-    public void removeSrc( int crow, int ccol){
-        if ( ( crow < 0 || crow > rows ) || ( ccol < 0 || ccol > cols)){
+
+    public void removeSrc(int crow, int ccol) {
+        if ((crow < 0 || crow > rows) || (ccol < 0 || ccol > cols)) {
             return;
         }
-        if ( this.src == cells[crow][ccol])
+        if (this.src == cells[crow][ccol])
             this.src = null;
         repaint();
     }
-    public void removeDst( int crow, int ccol){
-        if ( ( crow < 0 || crow > rows ) || ( ccol < 0 || ccol > cols)){
+
+    public void removeDst(int crow, int ccol) {
+        if ((crow < 0 || crow > rows) || (ccol < 0 || ccol > cols)) {
             return;
         }
-        if ( this.dst == cells[crow][ccol])
+        if (this.dst == cells[crow][ccol])
             this.dst = null;
         repaint();
     }
-    public boolean isObstacleHaveCell ( int crow, int ccol){
-        if ( crow >=0 && crow < rows && ccol >= 0 && ccol < cols)
+
+    public boolean isObstacleHaveCell(int crow, int ccol) {
+        if (crow >= 0 && crow < rows && ccol >= 0 && ccol < cols)
             return obstacles.contains(cells[crow][ccol]);
         return false;
     }
-    protected void removeObstacle( Cell cell){
-        if ( obstacles.contains(cell))
+
+    protected void removeObstacle(Cell cell) {
+        if (obstacles.contains(cell))
             obstacles.remove(cell);
         repaint();
     }
-    protected void setObstacles(LinkedList<Cell> list){
+
+    protected void setObstacles(LinkedList<Cell> list) {
         obstacles = list;
         repaint();
     }
@@ -322,25 +332,28 @@ public class MapComp extends JComponent implements Cloneable{
     protected LinkedList<Cell> getObstacles() {
         return obstacles;
     }
-    public Point getSrcPosition(){
+
+    public Point getSrcPosition() {
         return new Point(src.getPosRow(), src.getPosCol());
     }
-    public Point getDstPosition(){
-        return new Point( dst.getPosRow(), dst.getPosRow());
+
+    public Point getDstPosition() {
+        return new Point(dst.getPosRow(), dst.getPosRow());
     }
-    protected void setSrc(Cell src){
-        if ( this.dst == src)
-            dst =null;
-        if ( this.obstacles.contains(src))
+
+    protected void setSrc(Cell src) {
+        if (this.dst == src)
+            dst = null;
+        if (this.obstacles.contains(src))
             obstacles.remove(src);
         this.src = src;
         repaint();
     }
 
     protected void setDst(Cell dst) {
-        if ( this.src == dst)
+        if (this.src == dst)
             src = null;
-        if ( this.obstacles.contains(dst))
+        if (this.obstacles.contains(dst))
             obstacles.remove(dst);
         this.dst = dst;
         repaint();
@@ -353,23 +366,27 @@ public class MapComp extends JComponent implements Cloneable{
     protected Cell getDst() {
         return dst;
     }
-    public int getSrcRow(){
-        if ( src != null)
+
+    public int getSrcRow() {
+        if (src != null)
             return src.getPosRow();
         return -1;
     }
-    public int getSrcCol(){
-        if ( src != null)
+
+    public int getSrcCol() {
+        if (src != null)
             return src.getPosCol();
         return -1;
     }
-    public int getDstRow(){
-        if ( dst != null)
+
+    public int getDstRow() {
+        if (dst != null)
             return dst.getPosRow();
         return -1;
     }
-    public int getDstCol(){
-        if ( dst != null)
+
+    public int getDstCol() {
+        if (dst != null)
             return dst.getPosCol();
         return -1;
     }
@@ -385,22 +402,22 @@ public class MapComp extends JComponent implements Cloneable{
     @Override
     protected void paintComponent(Graphics g) {
         int x, y, w, h;
-        x= this.getInsets().left;
+        x = this.getInsets().left;
         y = this.getInsets().top;
-        w = this.getWidth() - ( this.getInsets().left  + this.getInsets().right);
+        w = this.getWidth() - (this.getInsets().left + this.getInsets().right);
         h = this.getHeight() - (this.getInsets().top + this.getInsets().bottom);
-        Graphics2D gg = (Graphics2D)g.create();
+        Graphics2D gg = (Graphics2D) g.create();
         gg.setColor(this.getBackground());
-        gg.fillRect(x,y,w,h);
+        gg.fillRect(x, y, w, h);
         gg.dispose();
     }
 
     public void setIndent(int indent) {
         this.indent = indent;
-        if ( this.indent < 2)
-            this.indent =2;
-        if ( this.indent > 10)
-            this.indent =10;
+        if (this.indent < 2)
+            this.indent = 2;
+        if (this.indent > 10)
+            this.indent = 10;
         // indent is always in between 2 and 10
         revalidate();
     }
@@ -408,11 +425,12 @@ public class MapComp extends JComponent implements Cloneable{
     public int getIndent() {
         return indent;
     }
-    public void setCellDim( int w, int h){
-        if ( w < 10 )
-            w=10;
-        if ( h < 10 )
-            h= 10;
+
+    public void setCellDim(int w, int h) {
+        if (w < 10)
+            w = 10;
+        if (h < 10)
+            h = 10;
         // w and h should be positive greater than or equal to 10
         group.setW(w);
         group.setH(h);
@@ -421,7 +439,7 @@ public class MapComp extends JComponent implements Cloneable{
 
     @Override
     public Dimension getMinimumSize() {
-        if ( this.getLayout() != null) {
+        if (this.getLayout() != null) {
             return this.getLayout().minimumLayoutSize(this);
         }
         return null;
@@ -429,7 +447,7 @@ public class MapComp extends JComponent implements Cloneable{
 
     @Override
     public Dimension getMaximumSize() {
-        if ( this.getLayout() != null) {
+        if (this.getLayout() != null) {
             return this.getLayout().preferredLayoutSize(this);
         }
         return null;
@@ -437,37 +455,35 @@ public class MapComp extends JComponent implements Cloneable{
 
     @Override
     public Dimension getPreferredSize() {
-        if ( this.getLayout() != null) {
+        if (this.getLayout() != null) {
             return this.getLayout().preferredLayoutSize(this);
         }
         return null;
     }
-    public void setDim(int rows, int cols){
+
+    public void setDim(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
         Cell[][] temp = new Cell[rows][cols];
-        for ( int i =0; i < rows ; i++){
-            for ( int j = 0; j < cols ; j++){
-                try{
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                try {
                     temp[i][j] = this.cells[i][j];
-                }
-                catch( Exception e){
-                    temp[i][j] = new Cell(i,j);
+                } catch (Exception e) {
+                    temp[i][j] = new Cell(i, j);
                     temp[i][j].setGroup(group);
                 }
             }
         }
         this.cells = temp;
         this.removeAll();
-        for ( int i =0; i < rows ; i++){
-           for (int j = 0; j < cols; j++){
-               if( cells[i][j] != null)
-                   this.add(cells[i][j]);
-           }
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (cells[i][j] != null)
+                    this.add(cells[i][j]);
+            }
         }
-
         revalidate();
-        // System.out.println("cells have been setted")
     }
 
     public int getRows() {
@@ -477,16 +493,18 @@ public class MapComp extends JComponent implements Cloneable{
     public int getCols() {
         return cols;
     }
-    public int getCellDim(){
+
+    public int getCellDim() {
         return group.w;
     }
 
-    private void startBestFirstSearch(){
-        class Node{
+    private void startBestFirstSearch() {
+        class Node {
             public int dx, dy;
 
             int crow, ccol;// stands for cellrow, cell col
-            Node(int crow, int ccol){
+
+            Node(int crow, int ccol) {
                 this.crow = crow;
                 this.ccol = ccol;
             }
@@ -500,15 +518,15 @@ public class MapComp extends JComponent implements Cloneable{
             }
         }
         Node nodes[][] = new Node[rows][cols];
-        for ( int i = 0; i < rows ; i ++){
-            for ( int j =0; j < cols;j++){
-                nodes[i][j] = new Node(i,j);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                nodes[i][j] = new Node(i, j);
             }
         }
         // Nodes created and initialized
-        HashSet<Node> open , closed;
+        HashSet<Node> open, closed;
         open = new HashSet<Node>();
-        int sx, sy , dx, dy;
+        int sx, sy, dx, dy;
 
 
         Runnable runn = new Runnable() {
@@ -520,15 +538,7 @@ public class MapComp extends JComponent implements Cloneable{
 
     }
 
-    private void startBreadthFirstSearch(){
-        Runnable runn = new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        };
-    }
-    private void startDepthFirstSearch(){
+    private void startBreadthFirstSearch() {
         Runnable runn = new Runnable() {
             @Override
             public void run() {
@@ -537,21 +547,30 @@ public class MapComp extends JComponent implements Cloneable{
         };
     }
 
-    private class MapCompLayoutManager implements LayoutManager{
+    private void startDepthFirstSearch() {
+        Runnable runn = new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        };
+    }
+
+    private class MapCompLayoutManager implements LayoutManager {
         @Override
         public Dimension minimumLayoutSize(Container parent) {
             Dimension dim = null;
-            if ( parent instanceof MapComp){
-                MapComp comp = (MapComp)parent;
-                int indent , rows, cols, cellw, cellh , width , height;
-                indent  = comp.getIndent();
+            if (parent instanceof MapComp) {
+                MapComp comp = (MapComp) parent;
+                int indent, rows, cols, cellw, cellh, width, height;
+                indent = comp.getIndent();
                 cellw = comp.group.getW();
                 cellh = comp.group.getH();
-                rows  = cells.length;
+                rows = cells.length;
                 cols = cells[0].length;
-                width = cols * ( cellw) + indent * ( cols+ 1);
-                height = rows * (cellh ) + indent * ( rows + 1);
-                dim = new Dimension(width , height);
+                width = cols * (cellw) + indent * (cols + 1);
+                height = rows * (cellh) + indent * (rows + 1);
+                dim = new Dimension(width, height);
             }
             return dim;
         }
@@ -559,24 +578,24 @@ public class MapComp extends JComponent implements Cloneable{
         @Override
         public Dimension preferredLayoutSize(Container parent) {
             Dimension dim = null;
-            if ( parent instanceof MapComp){
-                MapComp comp = (MapComp)parent;
-                int indent , rows, cols, cellw, cellh , width , height;
-                indent  = comp.getIndent();
+            if (parent instanceof MapComp) {
+                MapComp comp = (MapComp) parent;
+                int indent, rows, cols, cellw, cellh, width, height;
+                indent = comp.getIndent();
                 cellw = comp.group.getW();
                 cellh = comp.group.getH();
-                rows  = cells.length;
+                rows = cells.length;
                 cols = cells[0].length;
-                width = cols * ( cellw) + indent * ( cols+ 1);
-                height = rows * (cellh ) + indent * ( rows + 1);
-                dim = new Dimension(width , height);
+                width = cols * (cellw) + indent * (cols + 1);
+                height = rows * (cellh) + indent * (rows + 1);
+                dim = new Dimension(width, height);
             }
             return dim;
         }
 
         @Override
         public void layoutContainer(Container parent) {
-            synchronized(parent.getTreeLock()) {
+            synchronized (parent.getTreeLock()) {
                 if (!(parent instanceof MapComp))
                     return;
                 MapComp comp = (MapComp) parent;
@@ -609,15 +628,17 @@ public class MapComp extends JComponent implements Cloneable{
 
         }
     }
-    private static class CellGroup implements Cloneable{
-        public  Color colorForCellInOpenList ;
-        public  Color colorForCellInClosedList;
-        public  Color colorForSource;
-        public  Color colorForDestination;
-        public  Color colorForObstacles;
+
+    private static class CellGroup implements Cloneable {
+        public Color colorForCellInOpenList;
+        public Color colorForCellInClosedList;
+        public Color colorForSource;
+        public Color colorForDestination;
+        public Color colorForObstacles;
         public Color colorForCellInPath;
         private int w, h;
         private Color borderColor;
+
         CellGroup() {
             w = h = 10;
             borderColor = Color.BLACK;
@@ -628,24 +649,25 @@ public class MapComp extends JComponent implements Cloneable{
             colorForSource = Color.GREEN;
             colorForCellInPath = new Color(108, 155, 200);
         }
+
         @Override
         protected Object clone() throws CloneNotSupportedException {
-            CellGroup group = (CellGroup)super.clone();
-            if ( colorForSource != null)
+            CellGroup group = new CellGroup();
+            if (colorForSource != null)
                 group.colorForSource = new Color(this.colorForSource.getRGB());
-            if ( colorForCellInOpenList != null)
+            if (colorForCellInOpenList != null)
                 group.colorForCellInOpenList = new Color(this.colorForCellInOpenList.getRGB());
-            if ( colorForCellInClosedList != null)
-                group.colorForCellInClosedList = new Color( this.colorForCellInClosedList.getRGB());
-            if ( colorForDestination != null)
+            if (colorForCellInClosedList != null)
+                group.colorForCellInClosedList = new Color(this.colorForCellInClosedList.getRGB());
+            if (colorForDestination != null)
                 group.colorForDestination = new Color(this.colorForDestination.getRGB());
-            if ( colorForObstacles != null)
+            if (colorForObstacles != null)
                 group.colorForObstacles = new Color(this.colorForObstacles.getRGB());
-            if ( colorForCellInPath != null)
+            if (colorForCellInPath != null)
                 group.colorForCellInPath = new Color(this.colorForCellInPath.getRGB());
             group.w = this.w;
             group.h = this.h;
-            if ( borderColor != null)
+            if (borderColor != null)
                 group.borderColor = new Color(this.borderColor.getRGB());
             return group;
         }
@@ -674,39 +696,40 @@ public class MapComp extends JComponent implements Cloneable{
             return w;
         }
     } // A cell group
-    private  class Cell extends JComponent implements  Cloneable{
+
+    private class Cell extends JComponent implements Cloneable {
 
         private int row, col; // the grid location
-        private CellGroup group ;
-        private Color bgColor ;
+        private CellGroup group;
+        private Color bgColor;
 
-        Cell(int row, int col){
+        Cell(int row, int col) {
             this.row = row;
             this.col = col;
             this.setBgColor(Color.WHITE);
-            this.setBorder( BorderFactory.createLineBorder(Color.BLACK)); // default border color is line
+            this.setBorder(BorderFactory.createLineBorder(Color.BLACK)); // default border color is line
         }
 
         @Override
         protected Object clone() throws CloneNotSupportedException {
-            Cell cell = (Cell)super.clone();
-            if( bgColor != null)
+            Cell cell = new Cell(this.row, this.col);
+            if (bgColor != null)
                 cell.bgColor = new Color(bgColor.getRGB());
-            if ( group != null)
-                cell.group = (CellGroup)group.clone();
+            cell.group = null;
             return cell;
         }
 
         public void setGroup(CellGroup group) {
             this.group = group;
-            if ( group != null)
-                this.setBorder( BorderFactory.createLineBorder( group.borderColor));
+            if (group != null)
+                this.setBorder(BorderFactory.createLineBorder(group.borderColor));
         }
 
-        public int getPosRow(){
+        public int getPosRow() {
             return row;
         }
-        public int getPosCol(){
+
+        public int getPosCol() {
             return col;
         }
 
@@ -714,66 +737,68 @@ public class MapComp extends JComponent implements Cloneable{
             this.bgColor = bgColor;
             this.repaint();
         }
+
         int i = 10;
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            int x, y , w, h;
-            x = (int)this.getInsets().left;
+            int x, y, w, h;
+            x = (int) this.getInsets().left;
             y = this.getInsets().top;
-            w = this.getWidth() - (this.getInsets().left  + this.getInsets().right);
+            w = this.getWidth() - (this.getInsets().left + this.getInsets().right);
             h = this.getHeight() - (this.getInsets().top + this.getInsets().bottom);
-            Graphics2D gg = (Graphics2D)g.create();
-            MapComp comp = (MapComp)this.getParent();
-            bgColor= Color.WHITE;
-            boolean isSrc , isDst ,isInPath;
+            Graphics2D gg = (Graphics2D) g.create();
+            MapComp comp = (MapComp) this.getParent();
+            bgColor = Color.WHITE;
+            boolean isSrc, isDst, isInPath;
             isSrc = isDst = isInPath = false;
-            if ( comp.openset.contains(this) )
+            if (comp.openset.contains(this))
                 bgColor = group.colorForCellInOpenList;
-            if ( comp.closedset.contains(this))
-                bgColor  = group.colorForCellInClosedList;
-            if ( comp.pathset.contains(this) ) {
+            if (comp.closedset.contains(this))
+                bgColor = group.colorForCellInClosedList;
+            if (comp.pathset.contains(this)) {
                 bgColor = group.colorForCellInPath;
                 isInPath = true;
             }
-            if ( comp.src == this) {
+            if (comp.src == this) {
                 bgColor = group.colorForSource;
                 isSrc = true;
             }
-            if ( comp.dst == this) {
+            if (comp.dst == this) {
                 bgColor = group.colorForDestination;
                 isDst = true;
             }
-            if ( comp.obstacles.contains(this))
+            if (comp.obstacles.contains(this))
                 bgColor = group.colorForObstacles;
 
-            String s  = "";
+            String s = "";
 
-            if ( isSrc )
+            if (isSrc)
                 s = "S";
             if (isDst)
-                s ="D";
+                s = "D";
             int size = this.getWidth();
-            gg.setFont( new Font( Font.SERIF,Font.BOLD,size));
+            gg.setFont(new Font(Font.SERIF, Font.BOLD, size));
             int sw = gg.getFontMetrics(gg.getFont()).stringWidth("M");
             int as, ds; // stands for ascent and descent
             as = gg.getFontMetrics(gg.getFont()).getAscent();
             ds = gg.getFontMetrics(gg.getFont()).getDescent();
 
             gg.setColor(bgColor);
-            gg.fillRect(x,y,w,h);
-            gg.setColor( Color.BLACK);
+            gg.fillRect(x, y, w, h);
+            gg.setColor(Color.BLACK);
 
-            gg.drawString(s,this.getInsets().left + this.getWidth()/2 - sw/2 , this.getInsets().top  + this.getHeight()/2 +  as/2 - ds/2);
+            gg.drawString(s, this.getInsets().left + this.getWidth() / 2 - sw / 2, this.getInsets().top + this.getHeight() / 2 + as / 2 - ds / 2);
 
             gg.dispose();
         }
 
         @Override
         public Dimension getPreferredSize() {
-            Dimension dim  = new Dimension(0,0);
-            if ( group != null){
-                dim = new Dimension(group.getW() , group.getH());
+            Dimension dim = new Dimension(0, 0);
+            if (group != null) {
+                dim = new Dimension(group.getW(), group.getH());
             }
 
             return dim;
@@ -781,9 +806,9 @@ public class MapComp extends JComponent implements Cloneable{
 
         @Override
         public Dimension getMaximumSize() {
-            Dimension dim  = new Dimension(0,0);
-            if ( group != null){
-                dim = new Dimension(group.getW() , group.getH());
+            Dimension dim = new Dimension(0, 0);
+            if (group != null) {
+                dim = new Dimension(group.getW(), group.getH());
             }
 
             return dim;
@@ -791,26 +816,27 @@ public class MapComp extends JComponent implements Cloneable{
 
         @Override
         public Dimension getMinimumSize() {
-            Dimension dim  = null;
-            if ( group != null){
-                dim = new Dimension(group.getW() , group.getH());
+            Dimension dim = null;
+            if (group != null) {
+                dim = new Dimension(group.getW(), group.getH());
             }
             return dim;
         }
     }
 
-    public void showstat(){
-        if ( src != null)
-        System.out.println("SRc :("+ src.getPosRow() + ","+ src.getPosCol() + ").");
-        if ( dst != null)
-        System.out.println("dst :("+ dst.getPosRow() + ","+ dst.getPosCol() + ").");
+    public void showstat() {
+        if (src != null)
+            System.out.println("SRc :(" + src.getPosRow() + "," + src.getPosCol() + ").");
+        if (dst != null)
+            System.out.println("dst :(" + dst.getPosRow() + "," + dst.getPosCol() + ").");
         ListIterator itr = obstacles.listIterator();
-        while( itr.hasNext()){
-            Cell cell = (Cell)itr.next();
-            System.out.println("cell : (" + cell.getPosRow() + ","+ cell.getPosCol() + ").");
+        while (itr.hasNext()) {
+            Cell cell = (Cell) itr.next();
+            System.out.println("cell : (" + cell.getPosRow() + "," + cell.getPosCol() + ").");
         }
     }
-    private static class MapCompMouseListener implements MouseListener{
+
+    private static class MapCompMouseListener implements MouseListener {
         @Override
         public void mouseReleased(MouseEvent e) {
 
@@ -860,25 +886,24 @@ public class MapComp extends JComponent implements Cloneable{
                 }
                 if (isValidCell) {
                     // Add the cell to specified logic
-                    if (comp.getMode() == MapComp.SETOBSTACLEMODE){
-                        if( comp.obstacles.contains(comp.cells[px][py])) {
+                    if (comp.getMode() == MapComp.SETOBSTACLEMODE) {
+                        if (comp.obstacles.contains(comp.cells[px][py])) {
                             comp.removeCellFromObstacles(px, py);
-                        }
-                        else {
+                        } else {
                             comp.addCellToObstacles(px, py);
                         }
                     }
-                    if ( comp.getMode() == MapComp.SETSRCMODE){
-                        if ( comp.src == comp.cells[px][py])
-                            comp.removeSrc( px, py);
+                    if (comp.getMode() == MapComp.SETSRCMODE) {
+                        if (comp.src == comp.cells[px][py])
+                            comp.removeSrc(px, py);
                         else
-                            comp.setSrc( px, py);
+                            comp.setSrc(px, py);
                     }
-                    if ( comp.getMode() == MapComp.SETDSTMODE)
-                        if ( comp.dst == comp.cells[px][py])
-                            comp.removeDst(px,py);
+                    if (comp.getMode() == MapComp.SETDSTMODE)
+                        if (comp.dst == comp.cells[px][py])
+                            comp.removeDst(px, py);
                         else
-                            comp.setDst( px, py);
+                            comp.setDst(px, py);
                 }
 
             }
