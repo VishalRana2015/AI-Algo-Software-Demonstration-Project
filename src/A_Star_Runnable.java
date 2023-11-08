@@ -1,9 +1,9 @@
 import java.util.*;
 
-public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
+public class A_Star_Runnable implements AlgoRunnerRunnable {
     boolean exit;
     int delay;
-
+    MapComp mapComp;
     @Override
     public boolean takeExit() {
         return exit;
@@ -16,7 +16,7 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
 
     @Override
     public int getDelay() {
-        return delay;
+        return this.delay;
     }
 
     @Override
@@ -24,14 +24,11 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
         this.delay = delay;
     }
 
-    MapComp mapComp;
-
-    BestFirstSearchRunnable(MapComp comp) {
+    A_Star_Runnable(MapComp mapComp){
+        this.mapComp = mapComp;
+        this.delay = mapComp.getDelay();
         this.exit = false;
-        this.delay = comp.getDelay();
-        this.mapComp = comp;
     }
-
     @Override
     public void run() {
         mapComp.setStatus("Running BSF...");
@@ -55,13 +52,14 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
             // using Manhattan distance value
             int d1 = Math.abs(n1.getRow() - drow) + Math.abs(n1.getCol() - dcol);
             int d2 = Math.abs(n2.getRow() - drow) + Math.abs(n2.getCol() - dcol);
-            return d1 - d2;
+            return (n1.getDistance() + d1) - (d2 + n2.getDistance());
         };
 
         // clear any open, closed or pathSet
         mapComp.clear();
         PriorityQueue<Node> openQueue =new PriorityQueue<>(nodeManhattanComparator);
         openQueue.add(nodes[srow][scol]);
+        nodes[srow][scol].setDistance(0);
         visited[srow][scol] = false; // 1 stands for to be processed, 2 stands for has been processed, 0 stands for not considered to be processed yet.
         while (!openQueue.isEmpty() && !exit) {
             Node currentNode = openQueue.remove();
@@ -95,6 +93,7 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
                 }
                 else{
                     node.setParent(currentNode);
+                    node.setDistance(currentNode.getDistance() + 1);
                 }
             }
             openQueue.addAll(neighbourSet);

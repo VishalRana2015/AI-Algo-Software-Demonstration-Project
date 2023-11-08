@@ -74,16 +74,16 @@ public class DepthFirstSearchRunnable implements AlgoRunnerRunnable {
             }
             HashSet<Node> neighbours = moveGen4neighbour(currentNode, nodes, rows, cols);
             closedSet.add(currentNode);
-            visitedStatus[currentNode.row][currentNode.col] = 2;
+            visitedStatus[currentNode.getRow()][currentNode.getCol()] = 2;
             showCells(neighbours, "Neighbours");
             Iterator<Node> itr = neighbours.iterator();
             while (itr.hasNext()) {
                 Node node = itr.next();
-                if (visitedStatus[node.row][node.col] == 1 || visitedStatus[node.row][node.col] == 2) {
+                if (visitedStatus[node.getRow()][node.getCol()] == 1 || visitedStatus[node.getRow()][node.getCol()] == 2) {
                     itr.remove();
                 } else {
                     node.setParent(currentNode);
-                    visitedStatus[node.row][node.col]= 1;
+                    visitedStatus[node.getRow()][node.getCol()]= 1;
                     openStack.add(node);
                 }
             }
@@ -91,7 +91,7 @@ public class DepthFirstSearchRunnable implements AlgoRunnerRunnable {
             mapComp.removeFromOpen(currentNode.getRow(), currentNode.getCol());
             itr = neighbours.iterator();
             while (itr.hasNext()) {
-                Node node = (Node) itr.next();
+                Node node = itr.next();
                 mapComp.addToOpen(node.getRow(), node.getCol());
             }
             // open list of the component 'comp' is updated
@@ -184,7 +184,7 @@ public class DepthFirstSearchRunnable implements AlgoRunnerRunnable {
         LinkedList<Node> list = new LinkedList<>();
         while (node != null) {
             list.add(node);
-            node = node.parent;
+            node = node.getParent();
         }
         return list;
     }

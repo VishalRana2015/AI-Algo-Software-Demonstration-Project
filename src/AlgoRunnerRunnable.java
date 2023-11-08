@@ -4,6 +4,4 @@ public interface AlgoRunnerRunnable extends Runnable{
     int getDelay();
     void setDelay(int delay);
 
-   // public boolean goalTest(Node node, int drow, int dcol);
-
 }

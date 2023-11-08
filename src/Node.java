@@ -1,13 +1,14 @@
 import java.util.Objects;
 
 public class Node {
-    int row, col;
-    double f, g, h;
-    Node parent;
+    private int row, col;
+    private int distance;
+    private Node parent;
 
     Node(int row, int col) {
         this.col = col;
         this.row = row;
+        this.distance = 0;
         parent = null;
     }
 
@@ -25,6 +26,14 @@ public class Node {
 
     public int getRow() {
         return row;
+    }
+
+    public int getDistance() {
+        return this.distance;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
     }
 
     @Override

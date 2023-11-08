@@ -70,10 +70,10 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
                 Iterator<Node> itr = nextLevelNodeList.iterator();
                 while (itr.hasNext()) {
                     Node node = itr.next();
-                    if (visited[node.row][node.col]) {
+                    if (visited[node.getRow()][node.getCol()]) {
                         itr.remove();
                     } else {
-                        if (node.col >= startingCellColumn) {
+                        if (node.getCol() >= startingCellColumn) {
                             firstPart.add(node);
                         } else {
                             secondPart.add(node);
@@ -90,10 +90,10 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
             }
 
             Node currentNode = openList.remove();
-            if (visited[currentNode.row][currentNode.col]) {
+            if (visited[currentNode.getRow()][currentNode.getCol()]) {
                 continue;
             }
-            visited[currentNode.row][currentNode.col] = true;
+            visited[currentNode.getRow()][currentNode.getCol()] = true;
             if (goalTest(currentNode, destinationCellRow, destinationCellColumn)) {
                 System.out.println("Goal found");
                 LinkedList<Node> list = reconstructPath(currentNode);
@@ -116,7 +116,7 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
             Iterator<Node> itr = neighbourList.iterator();
             while (itr.hasNext()) {
                 Node node = itr.next();
-                if (visited[node.row][node.col]) {
+                if (visited[node.getRow()][node.getCol()]) {
                     itr.remove();
                 } else {
                     node.setParent(currentNode);
@@ -198,7 +198,7 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
         LinkedList<Node> list = new LinkedList<Node>();
         while (node != null) {
             list.add(node);
-            node = node.parent;
+            node = node.getParent();
         }
         return list;
     }

@@ -82,7 +82,7 @@ public class mainFrame {
                 status.setMaximumSize(status.getPreferredSize());
                 viewpanel.add(status);
                 JButton stop = new JButton("Stop");
-                stop.setMaximumSize(stop.getPreferredSize());
+                stop.setMinimumSize(stop.getPreferredSize());
                 viewpanel.add(stop);
                 frame.setContentPane(viewpanel);
                 MapComp finalComp = comp2;
@@ -98,14 +98,17 @@ public class mainFrame {
                 frame.revalidate();
                 int i = list.getSelectedIndex();
                 System.out.println("i : " + i);
-                if (i == 0) {
+                if (i == AlgoDemo.BEST_FIRST_SEARCH) {
                     AlgoDemo.runBestFirstSearch(comp2);
                 }
-                if (i == 1) {
+                else if (i == AlgoDemo.BREADTH_FIRST_SEARCH) {
                     AlgoDemo.runBreadthFirstSearch(comp2);
                 }
-                if (i == 2) {
+                else if(i == AlgoDemo.DEPTH_FIRST_SEARCH) {
                     AlgoDemo.runDepthFirstSearch(comp2);
+                }
+                else if( i == AlgoDemo.A_STAR){
+                    AlgoDemo.runAStarSearch(comp2);
                 }
             }
         });
