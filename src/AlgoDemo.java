@@ -93,11 +93,25 @@ public class AlgoDemo {
             return Objects.hash(drow, dcol);
         }
     }
-    public static void runBSF1(MapComp comp){
-        Runnable runnable = new BestFirstSearchRunnable(comp);
+    public static void runBestFirstSearch(MapComp mapComp){
+        BestFirstSearchRunnable runnable = new BestFirstSearchRunnable(mapComp);
         Thread thread = new Thread(runnable);
+        mapComp.setAlgoRunnerRunnable(runnable);
         thread.start();
-        comp.setThread(thread);
+    }
+
+    public static void runBreadthFirstSearch(MapComp mapComp){
+        BreadthFirstSearchRunnable runnable = new BreadthFirstSearchRunnable(mapComp);
+        Thread thread = new Thread(runnable);
+        mapComp.setAlgoRunnerRunnable(runnable);
+        thread.start();
+    }
+
+    public static void runDepthFirstSearch(MapComp mapComp){
+        DepthFirstSearchRunnable runnable = new DepthFirstSearchRunnable(mapComp);
+        Thread thread = new Thread(runnable);
+        mapComp.setAlgoRunnerRunnable(runnable);
+        thread.start();
     }
     // Best Search First
     public static void runBSF(MapComp comp) {
@@ -242,9 +256,9 @@ public class AlgoDemo {
         Thread thread = new Thread(runn);
         // This can't be the daemon thread since it output have to be seen visually as expected
         thread.start();
-        comp.setThread(thread);
     }
 
+    // Breadth first search
     public static void runBFS(MapComp comp) {
         comp.setStatus("Running BFS ...");
         System.out.println("hashCode : " + comp.hashCode());

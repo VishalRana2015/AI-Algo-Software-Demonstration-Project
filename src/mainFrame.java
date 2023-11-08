@@ -2,32 +2,68 @@ import javax.swing.*;
 import java.awt.*;
 import javax.swing.event.*;
 import java.awt.event.*;
+import java.util.jar.JarEntry;
 
 public class mainFrame {
-    public static MapComp comp = new MapComp(10, 20);
+    public static MapComp comp ;
     private static JScrollPane pane = new JScrollPane();
-    private static JPanel mainpanel, controlpanel, viewpanel;
+    private static JPanel controlpanel, viewpanel;
     private static JButton play = new JButton("Play");
     private static JFrame frame;
     private static Thread thread;
     private static JComboBox<String> list;
+
+    // static values
+
+
+    // The graph is made up of squares I call them cell, the below given static value is used to set initial width of those cells.
+    //public static int INITIAL_CELL_DIM = 30;
+    public static int INITIAL_INSET = 10;
+
+    // Represents scrollPane initial size
+    public static int PANE_MINIMUM_SIZE = 300;
+    // The left side of the menu is contains several controls to edit the graph, each control is placed in a vertical order and the following value is used to set space between those controls
+    public static int VERTICAL_STRUCT_HEIGHT = 10;
+
+    // When user clicks on the play button. A new thread is created that start searching the path to the given destination based on the selected algorithm.
+    // It displays cells that have been processed in RED color
+    // Cells that are yet to be processed in YELLOW color.
+    // You can control how fast or slow you want the thread to perform using the DELAY button.
+    // Following static values is used to set constraints and values on Delay button.
+    public static int DELAY_MIN = 0;
+    public static int DELAY_MAX = 10000;
+    public static int DELAY_INITIAL = 100;
+    public static int DELAY_STEP = 50;
+
+    // Below given four properties are used to set constraints on the cell size, that can be set from the UI.
+    public static int CELL_SIZE_INITIAL = 40;
+    public static int CELL_SIZE_MIN = 10;
+    public static int CELL_SIZE_MAX = 40;
+    public static int CELL_SIZE_STEP = 1;
+
+    // Below given two properties are used to set initial number of rows and columns in the graph.
+    public static int INITIAL_ROWS =  20 ;
+    public static int INITIAL_COLS = 20;
 
     private static void initialize() {
         frame = new JFrame();
         frame.setLocation(0, 0);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        comp = new MapComp(10, 20);
+        comp = new MapComp(INITIAL_ROWS, INITIAL_COLS);
         controlpanel = cp1();
         frame.setContentPane(controlpanel);
         play.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MapComp comp2 = new MapComp(10, 10);
+                MapComp comp2 = null;
                 try {
                     comp2 = (MapComp) comp.clone();
                 } catch (CloneNotSupportedException ee) {
                     System.out.println("CloneNotSupportedException ");
+                }
+                if ( comp2 == null){
+                    throw new RuntimeException("Something went wrong");
                 }
                 viewpanel = new JPanel();
                 viewpanel.setLayout(new BoxLayout(viewpanel, BoxLayout.Y_AXIS));
@@ -54,8 +90,8 @@ public class mainFrame {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         frame.setContentPane(controlpanel);
-                        System.out.println("stopping thread : "+ finalComp.thread.getName());
                         frame.revalidate();
+                        finalComp.algoRunnerRunnable.setExit(true);
                     }
                 });
 
@@ -63,14 +99,14 @@ public class mainFrame {
                 int i = list.getSelectedIndex();
                 System.out.println("i : " + i);
                 if (i == 0) {
-                    //AlgoDemo.runBSF(comp2);
-                    AlgoDemo.runBSF1(comp2);
-                    System.out.println("thread : " + thread.getName() + " running...");
+                    AlgoDemo.runBestFirstSearch(comp2);
                 }
-                if (i == 1)
-                    AlgoDemo.runBFS(comp2);
-                if (i == 2)
-                    AlgoDemo.runDFS(comp2);
+                if (i == 1) {
+                    AlgoDemo.runBreadthFirstSearch(comp2);
+                }
+                if (i == 2) {
+                    AlgoDemo.runDepthFirstSearch(comp2);
+                }
             }
         });
         frame.setVisible(true);
@@ -90,14 +126,14 @@ public class mainFrame {
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 0;
-        c.insets = new Insets(10, 10, 10, 10);
+        c.insets = new Insets(INITIAL_INSET, INITIAL_INSET, INITIAL_INSET, INITIAL_INSET);
         c.anchor = GridBagConstraints.CENTER;
         p.add(comp, c);
         viewport.setView(p);
         pane.setViewport(viewport);
-        comp.setCellDim(40, 40);
+        comp.setCellDim(CELL_SIZE_INITIAL, CELL_SIZE_INITIAL);
         pane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        pane.setMinimumSize(new Dimension(300, 300));
+        pane.setMinimumSize(new Dimension(PANE_MINIMUM_SIZE, PANE_MINIMUM_SIZE));
         //pane.setMaximumSize( comp.getMaximumSize());
         panel.add(pane);
         JPanel controlpanel = compPanel();
@@ -123,22 +159,22 @@ public class mainFrame {
         buttonpanel.setMaximumSize(buttonpanel.getPreferredSize());
 
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
         panel.add(buttonpanel);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
         JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
         //separator.setPreferredSize(new Dimension(Integer.MAX_VALUE, (int)separator.getPreferredSize().getHeight()));
         separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator.getPreferredSize().getHeight()));
         panel.add(separator);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
 
 
         JPanel sizePanel = new JPanel();
         sizePanel.setLayout(new GridBagLayout());
         JLabel rowlabel = new JLabel("Set Rows : ");
         JLabel collabel = new JLabel("Set Columns : ");
-        JSpinner rowspinner = new JSpinner(new SpinnerNumberModel(10, 1, 1000, 1));
-        JSpinner colspinner = new JSpinner(new SpinnerNumberModel(10, 1, 1000, 1));
+        JSpinner rowspinner = new JSpinner(new SpinnerNumberModel(INITIAL_ROWS, 1, 1000, 1));
+        JSpinner colspinner = new JSpinner(new SpinnerNumberModel(INITIAL_COLS, 1, 1000, 1));
         GridBagConstraints cont = new GridBagConstraints();
         cont.gridx = 0;
         cont.gridy = 0;
@@ -164,17 +200,19 @@ public class mainFrame {
 
 
         panel.add(sizePanel);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
         JSeparator separator2 = new JSeparator(JSeparator.HORIZONTAL);
         //separator.setPreferredSize(new Dimension(Integer.MAX_VALUE, (int)separator.getPreferredSize().getHeight()));
         separator2.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator2.getPreferredSize().getHeight()));
         panel.add(separator2);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
         JPanel cellsizepanel = new JPanel();
-        JLabel cellwidthlabel = new JLabel("Cell Width : ");
-        JLabel cellheightlabel = new JLabel("Cell height : ");
-        JSpinner cellwidthspinner = new JSpinner(new SpinnerNumberModel(10, 1, 40, 1));
-        JSpinner cellheightspinner = new JSpinner(new SpinnerNumberModel(10, 1, 40, 1));
+        JLabel cellwidthlabel = new JLabel("Cell Size : ");
+//        JLabel cellheightlabel = new JLabel("Cell height : ");
+        JLabel delayLabel = new JLabel("Delay (ms): ");
+        JSpinner cellwidthspinner = new JSpinner(new SpinnerNumberModel(CELL_SIZE_INITIAL,CELL_SIZE_MIN, CELL_SIZE_MAX, CELL_SIZE_STEP));
+//        JSpinner cellheightspinner = new JSpinner(new SpinnerNumberModel(10, 1, 40, 1));
+        JSpinner delaySpinner = new JSpinner(new SpinnerNumberModel(DELAY_INITIAL, DELAY_MIN, DELAY_MAX, DELAY_STEP));
         cellsizepanel.setLayout(new GridBagLayout());
         cont.gridx = 0;
         cont.gridy = 0;
@@ -183,23 +221,40 @@ public class mainFrame {
         cont.gridx = 1;
         cont.anchor = GridBagConstraints.WEST;
         cellsizepanel.add(cellwidthspinner, cont);
-        cont.gridx = 0;
-        cont.gridy = 1;
-        cont.anchor = GridBagConstraints.EAST;
-        cellsizepanel.add(cellheightlabel, cont);
-        cont.gridx = 1;
-        cont.anchor = GridBagConstraints.WEST;
-        cellsizepanel.add(cellheightspinner, cont);
+//        cont.gridx = 0;
+//        cont.gridy = 1;
+//        cont.anchor = GridBagConstraints.EAST;
+//        cellsizepanel.add(cellheightlabel, cont);
+//        cont.gridx = 1;
+//        cont.anchor = GridBagConstraints.WEST;
+//        cellsizepanel.add(cellheightspinner, cont);
         cellsizepanel.setMaximumSize(cellsizepanel.getPreferredSize());
         panel.add(cellsizepanel);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
 
 
         JSeparator separator6 = new JSeparator(JSeparator.HORIZONTAL);
+
         separator6.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator6.getPreferredSize().getHeight()));
 
         panel.add(separator6);
-        panel.add(Box.createVerticalStrut(5));
+        JPanel delayPanel = new JPanel();
+        delayPanel.setLayout(new GridBagLayout());
+        cont.gridx = 0;
+        cont.gridy = 0;
+        cont.anchor = GridBagConstraints.EAST;
+        delayPanel.add(delayLabel, cont);
+        cont.gridx = 1;
+        cont.anchor = GridBagConstraints.WEST;
+        delayPanel.add(delaySpinner, cont);
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
+        delayPanel.setMaximumSize(delayPanel.getPreferredSize());
+        panel.add(delayPanel);
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
+        JSeparator separator8 = new JSeparator(JSeparator.HORIZONTAL);
+        separator8.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator8.getPreferredSize().getHeight()));
+        panel.add(separator8);
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
 
         list = new JComboBox();
         list.addItem("Best First Search");
@@ -220,12 +275,11 @@ public class mainFrame {
         algoPanel.setMaximumSize(algoPanel.getPreferredSize());
         panel.add(algoPanel);
         algoPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
         JSeparator separator3 = new JSeparator(JSeparator.HORIZONTAL);
-        //separator.setPreferredSize(new Dimension(Integer.MAX_VALUE, (int)separator.getPreferredSize().getHeight()));
         separator3.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator3.getPreferredSize().getHeight()));
         panel.add(separator3);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
         JPanel editpanel = new JPanel();
         editpanel.setLayout(new GridBagLayout());
         JButton editcomp = new JButton("Edit City");
@@ -301,17 +355,18 @@ public class mainFrame {
         panel.add(editpanel);
         JSeparator separator5 = new JSeparator();
         separator5.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator5.getPreferredSize().getHeight()));
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
         panel.add(separator5);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
         panel.add(play);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
         JSeparator separator4 = new JSeparator();
         separator4.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator4.getPreferredSize().getHeight()));
         panel.add(separator4);
         panel.add(Box.createVerticalGlue());
         rowspinner.setValue(comp.getRows());
         colspinner.setValue(comp.getCols());
+        delaySpinner.setValue(comp.getDelay());
         cellwidthspinner.setValue(comp.getCellDim());
 // Names of controls in this panel
         // rowspinner, colspinner, play , importbutton, exportbutton, list, checkSrc, checkDst, checkObs, editcomp
@@ -337,6 +392,16 @@ public class mainFrame {
                 JSpinner sp = (JSpinner) e.getSource();
                 int val = (int) sp.getValue();
                 comp.setDim(comp.getRows(), val);
+            }
+        });
+
+        delaySpinner.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                System.out.println("delaySpinner change event");
+                JSpinner sp = (JSpinner) e.getSource();
+                int val = (int) sp.getValue();
+                comp.setDelay(val);
             }
         });
         JPanel panel2 = new JPanel();

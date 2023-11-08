@@ -26,7 +26,7 @@ public class MapComp extends JComponent implements Cloneable {
         if (dst != null)
             comp.dst = comp.cells[this.dst.row][this.dst.col];
 
-        comp.obstacles = new LinkedList<Cell>();
+        comp.obstacles = new LinkedList<>();
         if (obstacles != null) {
             for (int i = 0; i < obstacles.size(); i++) {
                 Cell obstacle =obstacles.get(i);
@@ -35,10 +35,11 @@ public class MapComp extends JComponent implements Cloneable {
         }
         comp.manager = new MapCompLayoutManager();
         comp.setBackground(Color.BLACK);
-        comp.changeListener =new Vector<ChangeListener>();
+        comp.changeListener =new Vector<>();
         comp.setLayout(manager);
         comp.setDim(rows,cols);
         comp.addMouseListener(listener);
+        comp.delay = this.delay;
         return comp;
     }
 
@@ -52,7 +53,7 @@ public class MapComp extends JComponent implements Cloneable {
     public static int SETDSTMODE = 3;
     MapCompMouseListener listener = new MapCompMouseListener();
     int mode;
-    int delay = 500;
+    int delay = 100;
     Cell src;
     Cell dst;
     LinkedList<Cell> obstacles = new LinkedList<Cell>();
@@ -61,10 +62,21 @@ public class MapComp extends JComponent implements Cloneable {
     HashSet<Cell> pathset = new HashSet<Cell>();
     private int indent;
     MapCompLayoutManager manager;
-    Thread thread;
+    AlgoRunnerRunnable algoRunnerRunnable;
 
     public MapComp() {
 
+    }
+
+    MapComp(int rows, int cols) {
+        indent = 0;
+        group = new CellGroup();
+        manager = new MapCompLayoutManager();
+        this.setBackground(Color.BLACK);
+        changeListener = new Vector<>();
+        this.setLayout(manager);
+        this.setDim(rows, cols);
+        this.addMouseListener(listener);
     }
 
     public void addToOpen(int crow, int ccol) {
@@ -80,8 +92,8 @@ public class MapComp extends JComponent implements Cloneable {
         System.out.println(Thread.currentThread().getName() + str);
     }
 
-    public void setThread(Thread thread){
-        this.thread = thread;
+    public void setAlgoRunnerRunnable(AlgoRunnerRunnable algoRunnerRunnable){
+        this.algoRunnerRunnable = algoRunnerRunnable;
     }
     public void removeFromOpen(int crow, int ccol) {
         printThread("removing from the open list");
@@ -148,17 +160,6 @@ public class MapComp extends JComponent implements Cloneable {
     }
 
     private boolean editMode = false;
-
-    MapComp(int rows, int cols) {
-        indent = 2;
-        group = new CellGroup();
-        manager = new MapCompLayoutManager();
-        this.setBackground(Color.BLACK);
-        changeListener = new Vector<ChangeListener>();
-        this.setLayout(manager);
-        this.setDim(rows, cols);
-        this.addMouseListener(listener);
-    }
 
     public void setDelay(int delay) {
         this.delay = delay;
@@ -414,11 +415,11 @@ public class MapComp extends JComponent implements Cloneable {
 
     public void setIndent(int indent) {
         this.indent = indent;
-        if (this.indent < 2)
-            this.indent = 2;
+        if (this.indent < 0)
+            this.indent = 0;
         if (this.indent > 10)
             this.indent = 10;
-        // indent is always in between 2 and 10
+        // indent is always in between 0 and 10
         revalidate();
     }
 

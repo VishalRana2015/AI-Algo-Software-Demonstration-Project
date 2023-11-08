@@ -27,6 +27,8 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
     MapComp mapComp;
 
     BestFirstSearchRunnable(MapComp comp) {
+        this.exit = false;
+        this.delay = comp.getDelay();
         this.mapComp = comp;
     }
 
@@ -43,7 +45,7 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
                 nodes[i][j] = new Node(i, j);
         }
         // Nodes created and initialized
-
+        int[][] visitedStatus = new int[rows][cols];
         int srow, scol, drow, dcol; // stands for sourceRow, sourceColumn , destinationRow, destinationColumn
         srow = mapComp.getSrcRow(); // srow stands for source Cell's row number
         scol = mapComp.getSrcCol(); // scol stands for source cell's col number
@@ -61,7 +63,8 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
         PriorityQueue<Node> openQueue =new PriorityQueue<>(nodeManhattanComparator);
         PriorityQueue<Node> closedQueue =new PriorityQueue<>(nodeManhattanComparator);
         openQueue.add(nodes[srow][scol]);
-        while (!openQueue.isEmpty()) {
+        visitedStatus[srow][scol] = 1; // 1 stands for to be processed, 2 stands for has been processed, 0 stands for not considered to be processed yet.
+        while (!openQueue.isEmpty() && !exit) {
             Node currentNode = openQueue.remove();
             if (goalTest(currentNode, drow, dcol)) {
                 LinkedList<Node> list = reconstructPath(currentNode);
@@ -82,19 +85,23 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
             HashSet<Node> neighbourSet = moveGen4neightbour(currentNode, nodes, rows, cols);
             openQueue.remove(currentNode);
             closedQueue.add(currentNode);
-            neighbourSet.removeAll(closedQueue);
-            neighbourSet.removeAll(openQueue);
-            Iterator itr = neighbourSet.iterator();
-            while (itr.hasNext()) {
-                Node child = (Node) itr.next();
-                child.setParent(currentNode);
+            visitedStatus[currentNode.row][currentNode.col] = 2;
+            Iterator<Node> itr = neighbourSet.iterator();
+            while ( itr.hasNext()){
+                Node node = itr.next();
+                if ( visitedStatus[node.row][node.col] == 1 || visitedStatus[node.row][node.col] == 2){
+                    itr.remove();
+                }
+                else{
+                    node.setParent(currentNode);
+                    visitedStatus[node.row][node.col] = 1; // to be processed.
+                }
             }
             openQueue.addAll(neighbourSet);
-
             mapComp.removeFromOpen(currentNode.getRow(), currentNode.getCol());
             itr = neighbourSet.iterator();
             while (itr.hasNext()) {
-                Node node = (Node) itr.next();
+                Node node = itr.next();
                 mapComp.addToOpen(node.getRow(), node.getCol());
             }
             // open list of the component 'comp' is updated
@@ -106,7 +113,6 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
             } catch (Exception e) {
                 System.out.println("Exception caught :" + e.getMessage());
             }
-
         }
     }
 
@@ -169,6 +175,4 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
         }
         return list;
     }
-
-
 }
