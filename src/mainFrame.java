@@ -1,17 +1,24 @@
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.event.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
 
 public class mainFrame {
-    public static MapComp comp ;
+    public static MapComp comp;
     private static JScrollPane pane = new JScrollPane();
     private static JPanel controlpanel, viewpanel;
     private static JButton play = new JButton("Play");
     private static JFrame frame;
     private static Thread thread;
     private static JComboBox<String> list;
+    public static JLabel statusLabel;
 
     // static values
 
@@ -32,8 +39,8 @@ public class mainFrame {
     // Following static values is used to set constraints and values on Delay button.
     public static int DELAY_MIN = 0;
     public static int DELAY_MAX = 10000;
-    public static int DELAY_INITIAL = 5000;
-    public static int DELAY_STEP = 50;
+    public static int DELAY_INITIAL = 50;
+    public static int DELAY_STEP = 20;
 
     // Below given four properties are used to set constraints on the cell size, that can be set from the UI.
     public static int CELL_SIZE_INITIAL = 10;
@@ -42,8 +49,14 @@ public class mainFrame {
     public static int CELL_SIZE_STEP = 1;
 
     // Below given two properties are used to set initial number of rows and columns in the graph.
-    public static int INITIAL_ROWS =  80 ;
+    public static int INITIAL_ROWS = 80;
     public static int INITIAL_COLS = 80;
+
+    public static String EXTENSION = "aialgo";
+
+    // colors
+    private static Color ERROR_COLOR = new Color(155, 6, 6);
+    private static Color SUCCESS_COLOR = new Color(5, 128, 5);
 
     private static void initialize() {
         frame = new JFrame();
@@ -62,7 +75,7 @@ public class mainFrame {
                 } catch (CloneNotSupportedException ee) {
                     System.out.println("CloneNotSupportedException ");
                 }
-                if ( comp2 == null){
+                if (comp2 == null) {
                     throw new RuntimeException("Something went wrong");
                 }
                 viewpanel = new JPanel();
@@ -100,14 +113,11 @@ public class mainFrame {
                 System.out.println("i : " + i);
                 if (i == AlgoDemo.BEST_FIRST_SEARCH) {
                     AlgoDemo.runBestFirstSearch(comp2);
-                }
-                else if (i == AlgoDemo.BREADTH_FIRST_SEARCH) {
+                } else if (i == AlgoDemo.BREADTH_FIRST_SEARCH) {
                     AlgoDemo.runBreadthFirstSearch(comp2);
-                }
-                else if(i == AlgoDemo.DEPTH_FIRST_SEARCH) {
+                } else if (i == AlgoDemo.DEPTH_FIRST_SEARCH) {
                     AlgoDemo.runDepthFirstSearch(comp2);
-                }
-                else if( i == AlgoDemo.A_STAR){
+                } else if (i == AlgoDemo.A_STAR) {
                     AlgoDemo.runAStarSearch(comp2);
                 }
             }
@@ -119,6 +129,7 @@ public class mainFrame {
     public static void main(String[] args) {
         initialize();
     }
+
     public static JPanel cp1() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
@@ -151,12 +162,109 @@ public class mainFrame {
         JPanel panel = new JPanel();
         JPanel buttonpanel = new JPanel();
         buttonpanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        JButton importbutton = new JButton("Import");
-        importbutton.setToolTipText("Import configuration from file.city");
-        JButton exportbutton = new JButton("Export");
-        exportbutton.setToolTipText("Export configuration to file.city");
-        buttonpanel.add(importbutton);
-        buttonpanel.add(exportbutton);
+        JButton importButton = new JButton("Import");
+        importButton.setToolTipText("Import configuration from file.city");
+        JButton exportButton = new JButton("Export");
+        exportButton.setToolTipText("Export configuration to file.city");
+        buttonpanel.add(importButton);
+        JFileChooser fileChooser = new JFileChooser();
+        FileNameExtensionFilter fileNameExtensionFilter = new FileNameExtensionFilter("Map Component Files", EXTENSION);
+        fileChooser.setFileFilter(fileNameExtensionFilter);
+
+        importButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int result = fileChooser.showOpenDialog(frame);
+                if (result != JFileChooser.APPROVE_OPTION) {
+                    return;
+                }
+                File file = fileChooser.getSelectedFile();
+                String fileName = file.getName();
+                int index = fileName.lastIndexOf('.');
+                if (index < 0) {
+                    statusLabel.setText("Error: Format not supported");
+                    statusLabel.setForeground(ERROR_COLOR);
+                }
+                String extension = fileName.substring(index + 1);
+                if (!EXTENSION.equals(extension)) {
+                    statusLabel.setText("Error: Format not supported");
+                    statusLabel.setForeground(ERROR_COLOR);
+                }
+                try {
+                    BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+                    StringTokenizer st = new StringTokenizer(bufferedReader.readLine());
+                    int rows = Integer.parseInt(st.nextToken()), cols = Integer.parseInt(st.nextToken());
+                    System.out.println(rows + " : " + cols);
+                    MapComp mapComp = new MapComp(rows, cols);
+                    st = new StringTokenizer(bufferedReader.readLine());
+                    int sourceRow = Integer.parseInt(st.nextToken()), sourceColumn = Integer.parseInt(st.nextToken());
+                    st = new StringTokenizer(bufferedReader.readLine());
+                    int destinationRow = Integer.parseInt(st.nextToken()), destinationColumn = Integer.parseInt(st.nextToken());
+                    mapComp.setSrc(sourceRow, sourceColumn);
+                    mapComp.setDst(destinationRow, destinationColumn);
+                    st = new StringTokenizer(bufferedReader.readLine());
+                    int obstaclesCount = Integer.parseInt(st.nextToken());
+                    for (int i = 0; i < obstaclesCount; i++) {
+                        st = new StringTokenizer(bufferedReader.readLine());
+                        int obsRow = Integer.parseInt(st.nextToken()), obsCol = Integer.parseInt(st.nextToken());
+                        mapComp.addCellToObstacles(obsRow, obsCol);
+                    }
+                    comp = mapComp;
+                    controlpanel = cp1();
+                    frame.setContentPane(controlpanel);
+                    frame.revalidate();
+                    statusLabel.setText("<html>" + file.getName() + "<br/>Imported successfully" + "</html>");
+                    statusLabel.setForeground(SUCCESS_COLOR);
+                } catch (Exception exp) {
+                    statusLabel.setText("<html>Error: Something happened wrong<br/>while reading the file<br/>The file is corrupt</html>");
+                    statusLabel.setForeground(ERROR_COLOR);
+                }
+                System.out.println("selected file : " + file.getAbsolutePath());
+            }
+        });
+
+
+        exportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (comp.src == null || comp.dst == null) {
+                    System.out.println("");
+                    statusLabel.setText("<html>Error: Source and Destination<br/>cells are required</html>");
+                    statusLabel.setForeground(ERROR_COLOR);
+                    return;
+                }
+                int result = fileChooser.showSaveDialog(frame);
+                System.out.println(result);
+                if (result != JFileChooser.APPROVE_OPTION) {
+                    return;
+                }
+                String filePath = fileChooser.getSelectedFile().getAbsolutePath() + "." + EXTENSION;
+                System.out.println(fileChooser.getSelectedFile().getAbsolutePath());
+
+                try {
+                    File file = new File(filePath);
+                    if (!file.exists()) {
+                        file.createNewFile();
+                    }
+                    PrintWriter printWriter = new PrintWriter(file);
+                    printWriter.write(comp.getRows() + " " + comp.getCols() + "\n");
+                    printWriter.write(comp.getSrcRow() + " " + comp.getSrcCol() + "\n");
+                    printWriter.write(comp.getDstRow() + " " + comp.getDstCol() + "\n");
+                    printWriter.write(comp.obstacles.size() + "\n");
+                    for (int i = 0; i < comp.obstacles.size(); i++) {
+                        printWriter.write(comp.obstacles.get(i).getPosRow() + " " + comp.obstacles.get(i).getPosCol() + "\n");
+                    }
+                    printWriter.close();
+                    statusLabel.setText("<html>" + file.getName() + "<br/>Exported successfully" + "</html>");
+                    statusLabel.setForeground(SUCCESS_COLOR);
+                } catch (Exception exp) {
+                    System.out.println(exp.getMessage());
+                    statusLabel.setText("<html>Error: Something happened <br/>while writing to file</html>");
+                    statusLabel.setForeground(ERROR_COLOR);
+                }
+            }
+        });
+        buttonpanel.add(exportButton);
         buttonpanel.setMinimumSize(buttonpanel.getPreferredSize());
         buttonpanel.setMaximumSize(buttonpanel.getPreferredSize());
         buttonpanel.setMaximumSize(buttonpanel.getPreferredSize());
@@ -213,7 +321,7 @@ public class mainFrame {
         JLabel cellwidthlabel = new JLabel("Cell Size : ");
 //        JLabel cellheightlabel = new JLabel("Cell height : ");
         JLabel delayLabel = new JLabel("Delay (ms): ");
-        JSpinner cellwidthspinner = new JSpinner(new SpinnerNumberModel(CELL_SIZE_INITIAL,CELL_SIZE_MIN, CELL_SIZE_MAX, CELL_SIZE_STEP));
+        JSpinner cellwidthspinner = new JSpinner(new SpinnerNumberModel(CELL_SIZE_INITIAL, CELL_SIZE_MIN, CELL_SIZE_MAX, CELL_SIZE_STEP));
 //        JSpinner cellheightspinner = new JSpinner(new SpinnerNumberModel(10, 1, 40, 1));
         JSpinner delaySpinner = new JSpinner(new SpinnerNumberModel(DELAY_INITIAL, DELAY_MIN, DELAY_MAX, DELAY_STEP));
         cellsizepanel.setLayout(new GridBagLayout());
@@ -366,10 +474,21 @@ public class mainFrame {
         JSeparator separator4 = new JSeparator();
         separator4.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator4.getPreferredSize().getHeight()));
         panel.add(separator4);
+
+        JPanel statusPanel = new JPanel();
+        statusPanel.setLayout(new FlowLayout());
+        statusLabel = new JLabel("Status ");
+        statusPanel.add(statusLabel);
+        statusLabel.setMaximumSize(new Dimension(PANE_MINIMUM_SIZE, 300));
+        panel.add(statusPanel);
+//        JSeparator separator9 = new JSeparator();
+//        separator4.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator9.getPreferredSize().getHeight()));
+//        panel.add(separator9);
+
         panel.add(Box.createVerticalGlue());
         rowspinner.setValue(comp.getRows());
         colspinner.setValue(comp.getCols());
-        delaySpinner.setValue(comp.getDelay());
+        comp.setDelay((Integer) delaySpinner.getValue());
         cellwidthspinner.setValue(comp.getCellDim());
 // Names of controls in this panel
         // rowspinner, colspinner, play , importbutton, exportbutton, list, checkSrc, checkDst, checkObs, editcomp

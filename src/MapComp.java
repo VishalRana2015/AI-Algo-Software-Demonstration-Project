@@ -699,7 +699,7 @@ public class MapComp extends JComponent implements Cloneable {
         }
     } // A cell group
 
-    private class Cell extends JComponent implements Cloneable {
+    public class Cell extends JComponent implements Cloneable {
 
         private int row, col; // the grid location
         private CellGroup group;
