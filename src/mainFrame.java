@@ -32,7 +32,7 @@ public class mainFrame {
     // Following static values is used to set constraints and values on Delay button.
     public static int DELAY_MIN = 0;
     public static int DELAY_MAX = 10000;
-    public static int DELAY_INITIAL = 100;
+    public static int DELAY_INITIAL = 5000;
     public static int DELAY_STEP = 50;
 
     // Below given four properties are used to set constraints on the cell size, that can be set from the UI.

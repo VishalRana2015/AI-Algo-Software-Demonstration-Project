@@ -1,7 +1,5 @@
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
+import java.sql.Array;
+import java.util.*;
 
 public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
     boolean exit;
@@ -30,7 +28,7 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
 
     BreadthFirstSearchRunnable(MapComp mapComp) {
         this.mapComp = mapComp;
-        this.delay = 100;
+        this.delay = mapComp.getDelay();
         this.exit = false;
     }
 
@@ -44,6 +42,7 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
         rows = mapComp.getRows();
         cols = mapComp.getCols();
         Node[][] nodes = new Node[rows][cols];
+        boolean[][] visited = new boolean[rows][cols];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++)
                 nodes[i][j] = new Node(i, j);
@@ -55,24 +54,56 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
         startingCellColumn = mapComp.getSrcCol();
         destinationCellRow = mapComp.getDstRow();
         destinationCellColumn = mapComp.getDstCol();
-        LinkedHashSet<Node> openList = new LinkedHashSet<>();
-        LinkedHashSet<Node> closedList = new LinkedHashSet<>();
+        LinkedList<Node> openList = new LinkedList<>();
         openList.add(nodes[startingCellRow][startingCellColumn]);
-        while (!openList.isEmpty() && !exit) {
+        ArrayList<Node> nextLevelNodeList = new ArrayList<>();
+        while (!exit) {
             System.out.println("Current thread : " + Thread.currentThread().getName() + " running ...");
             System.out.println("In open");
-            Node currentNode = openList.iterator().next();
-            openList.remove(currentNode);
+            if (openList.isEmpty()) {
+                if (nextLevelNodeList.isEmpty()) {
+                    exit = true;
+                    continue;
+                }
+                // split this list in two parts
+                ArrayList<Node> firstPart = new ArrayList<>(), secondPart = new ArrayList<>();
+                Iterator<Node> itr = nextLevelNodeList.iterator();
+                while (itr.hasNext()) {
+                    Node node = itr.next();
+                    if (visited[node.row][node.col]) {
+                        itr.remove();
+                    } else {
+                        if (node.col >= startingCellColumn) {
+                            firstPart.add(node);
+                        } else {
+                            secondPart.add(node);
+                        }
+                    }
+                }
+                // sort first in descending order of column values.
+                firstPart.sort((Node n1, Node n2) -> n1.getRow() - n2.getRow());
+                // sort second part in increasing order of column values
+                secondPart.sort((Node n1, Node n2) -> n2.getRow() - n1.getRow());
+                openList.addAll(firstPart); // it automatically makes add the elements in the same order as they are in the arrayList.
+                openList.addAll(secondPart);
+                nextLevelNodeList = new ArrayList<>();
+            }
+
+            Node currentNode = openList.remove();
+            if (visited[currentNode.row][currentNode.col]) {
+                continue;
+            }
+            visited[currentNode.row][currentNode.col] = true;
             if (goalTest(currentNode, destinationCellRow, destinationCellColumn)) {
                 System.out.println("Goal found");
                 LinkedList<Node> list = reconstructPath(currentNode);
                 // set the path and return
                 int[] rowarray = new int[list.size()];
                 int[] colarray = new int[list.size()];
-                Iterator itr = list.iterator();
+                Iterator<Node> itr = list.iterator();
                 int index = 0;
                 while (itr.hasNext()) {
-                    Node node = (Node) itr.next();
+                    Node node = itr.next();
                     rowarray[index] = node.getRow();
                     colarray[index] = node.getCol();
                     index++;
@@ -81,21 +112,18 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
                 System.out.println("Path set");
                 return;
             }
-
-            HashSet<Node> neighbourSet = moveGen4neighbour(currentNode, nodes, rows, cols);
-            openList.remove(currentNode);
-            closedList.add(currentNode);
-            Iterator<Node> itr = neighbourSet.iterator();
+            LinkedList<Node> neighbourList = moveGen4neighbour(currentNode, nodes, rows, cols);
+            Iterator<Node> itr = neighbourList.iterator();
             while (itr.hasNext()) {
                 Node node = itr.next();
-                if (openList.contains(node) || closedList.contains(node)) {
+                if (visited[node.row][node.col]) {
                     itr.remove();
                 } else {
                     node.setParent(currentNode);
                     mapComp.addToOpen(node.getRow(), node.getCol());
                 }
             }
-            openList.addAll(neighbourSet);
+            nextLevelNodeList.addAll(neighbourList);
             System.out.println("neighbours added");
             mapComp.removeFromOpen(currentNode.getRow(), currentNode.getCol());
             mapComp.addToClose(currentNode.getRow(), currentNode.getCol());
@@ -127,27 +155,37 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
 //        return set;
 //    }
 
-    private HashSet<Node> moveGen4neighbour(Node currentNode, Node[][] nodes, int rows, int cols) {
-        HashSet<Node> set = new HashSet<>();
+    private LinkedList<Node> moveGen4neighbour(Node currentNode, Node[][] nodes, int rows, int cols) {
+        LinkedList<Node> neighbourList = new LinkedList<>();
         int nrow, ncol; // stands for nextCellRow and nextCellColumn
         int currentCellRow, currentCellColumn; //
         currentCellRow = currentNode.getRow();
         currentCellColumn = currentNode.getCol();
         nrow = currentCellRow - 1;
         ncol = currentCellColumn;
-        if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol))
-            set.add(nodes[nrow][ncol]);
+        // north
+        if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol)) {
+            neighbourList.add(nodes[nrow][ncol]);
+        }
+        // east
+        nrow = currentCellRow;
+        ncol = currentCellColumn + 1;
+        if (ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol)) {
+            neighbourList.add(nodes[nrow][ncol]);
+        }
+        // south
+        ncol = currentCellColumn;
         nrow = currentCellRow + 1;
-        if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol))
-            set.add(nodes[nrow][ncol]);
+        if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol)) {
+            neighbourList.add(nodes[nrow][ncol]);
+        }
+        // west
         nrow = currentCellRow;
         ncol = currentCellColumn - 1;
-        if (ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol))
-            set.add(nodes[nrow][ncol]);
-        ncol = currentCellColumn + 1;
-        if (ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol))
-            set.add(nodes[nrow][ncol]);
-        return set;
+        if (ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol)) {
+            neighbourList.add(nodes[nrow][ncol]);
+        }
+        return neighbourList;
     }
 
     private boolean goalTest(Node currentNode, int destinationRow, int destinationColumn) {
