@@ -36,14 +36,14 @@ public class mainFrame {
     public static int DELAY_STEP = 50;
 
     // Below given four properties are used to set constraints on the cell size, that can be set from the UI.
-    public static int CELL_SIZE_INITIAL = 40;
+    public static int CELL_SIZE_INITIAL = 10;
     public static int CELL_SIZE_MIN = 10;
     public static int CELL_SIZE_MAX = 40;
     public static int CELL_SIZE_STEP = 1;
 
     // Below given two properties are used to set initial number of rows and columns in the graph.
-    public static int INITIAL_ROWS =  20 ;
-    public static int INITIAL_COLS = 20;
+    public static int INITIAL_ROWS =  80 ;
+    public static int INITIAL_COLS = 80;
 
     private static void initialize() {
         frame = new JFrame();

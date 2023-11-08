@@ -642,13 +642,14 @@ public class MapComp extends JComponent implements Cloneable {
 
         CellGroup() {
             w = h = 10;
-            borderColor = Color.BLACK;
-            colorForCellInClosedList = new Color(130, 0, 0);
+            borderColor = new Color(197, 181, 192);
+            //borderColor = Color.BLACK;
+            colorForCellInClosedList = new Color(166, 52, 52);
             colorForCellInOpenList = new Color(200, 145, 33);
             colorForDestination = new Color(76, 32, 244);
             colorForObstacles = Color.BLACK;
             colorForSource = Color.GREEN;
-            colorForCellInPath = new Color(108, 155, 200);
+            colorForCellInPath = new Color(21, 17, 82);
         }
 
         @Override
@@ -825,18 +826,6 @@ public class MapComp extends JComponent implements Cloneable {
         }
     }
 
-    public void showstat() {
-        if (src != null)
-            System.out.println("SRc :(" + src.getPosRow() + "," + src.getPosCol() + ").");
-        if (dst != null)
-            System.out.println("dst :(" + dst.getPosRow() + "," + dst.getPosCol() + ").");
-        ListIterator itr = obstacles.listIterator();
-        while (itr.hasNext()) {
-            Cell cell = (Cell) itr.next();
-            System.out.println("cell : (" + cell.getPosRow() + "," + cell.getPosCol() + ").");
-        }
-    }
-
     private static class MapCompMouseListener implements MouseListener {
         @Override
         public void mouseReleased(MouseEvent e) {
@@ -910,5 +899,4 @@ public class MapComp extends JComponent implements Cloneable {
             }
         }
     }
-
 }

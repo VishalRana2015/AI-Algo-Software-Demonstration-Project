@@ -4,10 +4,10 @@ import java.util.*;
 
 public class AlgoDemo {
     // list of algorithms this class supports
-    public static int BEST_FIRST_SEARCH = 1;
-    public static int BREADTH_FIRST_SEARCH = 2;
-    public static int DEPTH_FIRST_SEARCH = 3;
-    public static int A_STAR = 4;
+    public static int BEST_FIRST_SEARCH = 0;
+    public static int BREADTH_FIRST_SEARCH = 1;
+    public static int DEPTH_FIRST_SEARCH = 2;
+    public static int A_STAR = 3;
 
     private static class Node {
         int nrow, ncol;
