@@ -34,32 +34,23 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
 
     @Override
     public void run() {
-        mapComp.setStatus("Running Breadth First Search Algorithm...");
-        System.out.println("hashCode : " + mapComp.hashCode());
         // clearing data from the component if any
         mapComp.clear();
         int rows, cols;
         rows = mapComp.getRows();
         cols = mapComp.getCols();
-        Node[][] nodes = new Node[rows][cols];
         boolean[][] visited = new boolean[rows][cols];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++)
-                nodes[i][j] = new Node(i, j);
-        }
+
         // Nodes created and initialized
-        System.out.println("Nodes created");
         int startingCellRow, startingCellColumn, destinationCellRow, destinationCellColumn; // stands for sourceRow, sourceColumn , destinationRow, destinationColumn
         startingCellRow = mapComp.getSrcRow();
         startingCellColumn = mapComp.getSrcCol();
         destinationCellRow = mapComp.getDstRow();
         destinationCellColumn = mapComp.getDstCol();
         LinkedList<Node> openList = new LinkedList<>();
-        openList.add(nodes[startingCellRow][startingCellColumn]);
+        openList.add(new Node(startingCellRow, startingCellColumn));
         ArrayList<Node> nextLevelNodeList = new ArrayList<>();
         while (!exit) {
-            System.out.println("Current thread : " + Thread.currentThread().getName() + " running ...");
-            System.out.println("In open");
             if (openList.isEmpty()) {
                 if (nextLevelNodeList.isEmpty()) {
                     exit = true;
@@ -95,7 +86,6 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
             }
             visited[currentNode.getRow()][currentNode.getCol()] = true;
             if (goalTest(currentNode, destinationCellRow, destinationCellColumn)) {
-                System.out.println("Goal found");
                 LinkedList<Node> list = reconstructPath(currentNode);
                 // set the path and return
                 int[] rowarray = new int[list.size()];
@@ -109,10 +99,9 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
                     index++;
                 }
                 mapComp.setPath(rowarray, colarray);
-                System.out.println("Path set");
                 return;
             }
-            LinkedList<Node> neighbourList = moveGen4neighbour(currentNode, nodes, rows, cols);
+            LinkedList<Node> neighbourList = moveGen4neighbour(currentNode, rows, cols);
             Iterator<Node> itr = neighbourList.iterator();
             while (itr.hasNext()) {
                 Node node = itr.next();
@@ -124,7 +113,6 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
                 }
             }
             nextLevelNodeList.addAll(neighbourList);
-            System.out.println("neighbours added");
             mapComp.removeFromOpen(currentNode.getRow(), currentNode.getCol());
             mapComp.addToClose(currentNode.getRow(), currentNode.getCol());
             try {
@@ -133,7 +121,6 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
                 System.out.println("Exception caught :" + e.getMessage());
             }
         }
-        System.out.println("returning from run");
     }
 
 //    private LinkedList<Node> moveGen8neighbour(Node N) {
@@ -155,7 +142,7 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
 //        return set;
 //    }
 
-    private LinkedList<Node> moveGen4neighbour(Node currentNode, Node[][] nodes, int rows, int cols) {
+    private LinkedList<Node> moveGen4neighbour(Node currentNode, int rows, int cols) {
         LinkedList<Node> neighbourList = new LinkedList<>();
         int nrow, ncol; // stands for nextCellRow and nextCellColumn
         int currentCellRow, currentCellColumn; //
@@ -165,25 +152,33 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
         ncol = currentCellColumn;
         // north
         if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            neighbourList.add(nodes[nrow][ncol]);
+            Node nn = new Node(nrow, ncol);
+            nn.setDistance(currentNode.getDistance() + 1);
+            neighbourList.add(nn);
         }
         // east
         nrow = currentCellRow;
         ncol = currentCellColumn + 1;
         if (ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            neighbourList.add(nodes[nrow][ncol]);
+            Node nn = new Node(nrow, ncol);
+            nn.setDistance(currentNode.getDistance() + 1);
+            neighbourList.add(nn);
         }
         // south
         ncol = currentCellColumn;
         nrow = currentCellRow + 1;
         if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            neighbourList.add(nodes[nrow][ncol]);
+            Node nn = new Node(nrow, ncol);
+            nn.setDistance(currentNode.getDistance() + 1);
+            neighbourList.add(nn);
         }
         // west
         nrow = currentCellRow;
         ncol = currentCellColumn - 1;
         if (ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            neighbourList.add(nodes[nrow][ncol]);
+            Node nn = new Node(nrow, ncol);
+            nn.setDistance(currentNode.getDistance() + 1);
+            neighbourList.add(nn);
         }
         return neighbourList;
     }

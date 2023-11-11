@@ -36,11 +36,6 @@ public class A_Star_Runnable implements AlgoRunnerRunnable {
         int rows, cols;
         rows = mapComp.getRows();
         cols = mapComp.getCols();
-        Node[][] nodes = new Node[rows][cols];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++)
-                nodes[i][j] = new Node(i, j);
-        }
         // Nodes created and initialized
         boolean[][] visited = new boolean[rows][cols];
         int srow, scol, drow, dcol; // stands for sourceRow, sourceColumn , destinationRow, destinationColumn
@@ -52,17 +47,26 @@ public class A_Star_Runnable implements AlgoRunnerRunnable {
             // using Manhattan distance value
             int d1 = Math.abs(n1.getRow() - drow) + Math.abs(n1.getCol() - dcol);
             int d2 = Math.abs(n2.getRow() - drow) + Math.abs(n2.getCol() - dcol);
-            return (n1.getDistance() + d1) - (d2 + n2.getDistance());
+            int value1 = n1.getDistance() + d1;
+            int value2 = d2 + n2.getDistance();
+            if ( value1 == value2){
+                // return cell which is nearest to destination
+                return n1.getDistance() - n2.getDistance();
+            }
+            return value1-value2;
         };
 
         // clear any open, closed or pathSet
         mapComp.clear();
         PriorityQueue<Node> openQueue =new PriorityQueue<>(nodeManhattanComparator);
-        openQueue.add(nodes[srow][scol]);
-        nodes[srow][scol].setDistance(0);
+        Node startingNode= new Node(srow, scol);
+        openQueue.add(startingNode);
+        startingNode.setDistance(0);
         visited[srow][scol] = false; // 1 stands for to be processed, 2 stands for has been processed, 0 stands for not considered to be processed yet.
         while (!openQueue.isEmpty() && !exit) {
             Node currentNode = openQueue.remove();
+            int totalDistance = currentNode.getDistance() + ( Math.abs(drow-currentNode.getRow()) + Math.abs(dcol-currentNode.getCol()));
+            System.out.println(currentNode + ", heuristic distance to destination  : " +  ( Math.abs(drow-currentNode.getRow()) + Math.abs(dcol-currentNode.getCol())) + ", totalDistance : "+ totalDistance);
             if (goalTest(currentNode, drow, dcol)) {
                 LinkedList<Node> list = reconstructPath(currentNode);
                 // set the path and return
@@ -79,7 +83,7 @@ public class A_Star_Runnable implements AlgoRunnerRunnable {
                 mapComp.setPath(rowarray, colarray);
                 return;
             }
-            HashSet<Node> neighbourSet = moveGen4neightbour(currentNode, nodes, rows, cols);
+            HashSet<Node> neighbourSet = moveGen4neightbour(currentNode, rows, cols);
             openQueue.remove(currentNode);
             if ( visited[currentNode.getRow()][currentNode.getCol()]){
                 continue;
@@ -94,15 +98,11 @@ public class A_Star_Runnable implements AlgoRunnerRunnable {
                 else{
                     node.setParent(currentNode);
                     node.setDistance(currentNode.getDistance() + 1);
+                    mapComp.addToOpen(node.getRow(), node.getCol());
                 }
             }
             openQueue.addAll(neighbourSet);
             mapComp.removeFromOpen(currentNode.getRow(), currentNode.getCol());
-            itr = neighbourSet.iterator();
-            while (itr.hasNext()) {
-                Node node = itr.next();
-                mapComp.addToOpen(node.getRow(), node.getCol());
-            }
             // open list of the component 'comp' is updated
             // updateing the closed list
             mapComp.addToClose(currentNode.getRow(), currentNode.getCol());
@@ -136,7 +136,7 @@ public class A_Star_Runnable implements AlgoRunnerRunnable {
 //            }
 
     // Generate four touching neighbors
-    public HashSet<Node> moveGen4neightbour(Node currentNode, Node[][] nodes, int rows, int cols) {
+    public HashSet<Node> moveGen4neightbour(Node currentNode, int rows, int cols) {
         HashSet<Node> set = new HashSet<>();
         int nrow, ncol; // stands for newRow , newColumn
         int Nrow, Ncol;
@@ -146,27 +146,36 @@ public class A_Star_Runnable implements AlgoRunnerRunnable {
         ncol = Ncol;
         // north
         if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            set.add(nodes[nrow][ncol]);
+            Node nn = new Node(nrow, ncol);
+            nn.setDistance(currentNode.getDistance() + 1);
+            set.add(nn);
         }
 
         // east
         nrow = Nrow;
         ncol = Ncol + 1;
         if (ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            set.add(nodes[nrow][ncol]);
+            Node nn = new Node(nrow, ncol);
+            nn.setDistance(currentNode.getDistance() + 1);
+            set.add(nn);
         }
 
         // south
         nrow = Nrow + 1;
         ncol =Ncol;
-        if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol))
-            set.add(nodes[nrow][ncol]);
+        if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol)) {
+            Node nn = new Node(nrow, ncol);
+            nn.setDistance(currentNode.getDistance() + 1);
+            set.add(nn);
+        }
 
         //west
         nrow = Nrow;
         ncol = Ncol - 1;
         if (ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            set.add(nodes[nrow][ncol]);
+            Node nn = new Node(nrow, ncol);
+            nn.setDistance(currentNode.getDistance() + 1);
+            set.add(nn);
         }
         return set;
     }

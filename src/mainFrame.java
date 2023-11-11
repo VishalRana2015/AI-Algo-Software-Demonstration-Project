@@ -39,18 +39,18 @@ public class mainFrame {
     // Following static values is used to set constraints and values on Delay button.
     public static int DELAY_MIN = 0;
     public static int DELAY_MAX = 10000;
-    public static int DELAY_INITIAL = 50;
+    public static int DELAY_INITIAL = 10;
     public static int DELAY_STEP = 20;
 
     // Below given four properties are used to set constraints on the cell size, that can be set from the UI.
-    public static int CELL_SIZE_INITIAL = 10;
+    public static int CELL_SIZE_INITIAL = 15;
     public static int CELL_SIZE_MIN = 10;
     public static int CELL_SIZE_MAX = 40;
     public static int CELL_SIZE_STEP = 1;
 
     // Below given two properties are used to set initial number of rows and columns in the graph.
-    public static int INITIAL_ROWS = 80;
-    public static int INITIAL_COLS = 80;
+    public static int INITIAL_ROWS = 40;
+    public static int INITIAL_COLS = 40;
 
     public static String EXTENSION = "aialgo";
 
@@ -110,7 +110,6 @@ public class mainFrame {
 
                 frame.revalidate();
                 int i = list.getSelectedIndex();
-                System.out.println("i : " + i);
                 if (i == AlgoDemo.BEST_FIRST_SEARCH) {
                     AlgoDemo.runBestFirstSearch(comp2);
                 } else if (i == AlgoDemo.BREADTH_FIRST_SEARCH) {
@@ -194,7 +193,6 @@ public class mainFrame {
                     BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
                     StringTokenizer st = new StringTokenizer(bufferedReader.readLine());
                     int rows = Integer.parseInt(st.nextToken()), cols = Integer.parseInt(st.nextToken());
-                    System.out.println(rows + " : " + cols);
                     MapComp mapComp = new MapComp(rows, cols);
                     st = new StringTokenizer(bufferedReader.readLine());
                     int sourceRow = Integer.parseInt(st.nextToken()), sourceColumn = Integer.parseInt(st.nextToken());
@@ -219,7 +217,6 @@ public class mainFrame {
                     statusLabel.setText("<html>Error: Something happened wrong<br/>while reading the file<br/>The file is corrupt</html>");
                     statusLabel.setForeground(ERROR_COLOR);
                 }
-                System.out.println("selected file : " + file.getAbsolutePath());
             }
         });
 
@@ -228,18 +225,15 @@ public class mainFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (comp.src == null || comp.dst == null) {
-                    System.out.println("");
                     statusLabel.setText("<html>Error: Source and Destination<br/>cells are required</html>");
                     statusLabel.setForeground(ERROR_COLOR);
                     return;
                 }
                 int result = fileChooser.showSaveDialog(frame);
-                System.out.println(result);
                 if (result != JFileChooser.APPROVE_OPTION) {
                     return;
                 }
                 String filePath = fileChooser.getSelectedFile().getAbsolutePath() + "." + EXTENSION;
-                System.out.println(fileChooser.getSelectedFile().getAbsolutePath());
 
                 try {
                     File file = new File(filePath);
@@ -520,7 +514,6 @@ public class mainFrame {
         delaySpinner.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                System.out.println("delaySpinner change event");
                 JSpinner sp = (JSpinner) e.getSource();
                 int val = (int) sp.getValue();
                 comp.setDelay(val);

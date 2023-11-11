@@ -80,24 +80,17 @@ public class MapComp extends JComponent implements Cloneable {
     }
 
     public void addToOpen(int crow, int ccol) {
-        printThread("Adding to open ");
-        printThread( "hashCode : "+ cells[crow][ccol].hashCode() + "comp.hashCode : "+ this.hashCode());
         if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
             if (!openset.contains(cells[crow][ccol]))
                 openset.add(cells[crow][ccol]);
         }
         repaint();
     }
-    public void printThread(String str){
-        System.out.println(Thread.currentThread().getName() + str);
-    }
 
     public void setAlgoRunnerRunnable(AlgoRunnerRunnable algoRunnerRunnable){
         this.algoRunnerRunnable = algoRunnerRunnable;
     }
     public void removeFromOpen(int crow, int ccol) {
-        printThread("removing from the open list");
-        printThread("hashCode " + cells[crow][ccol].hashCode()+ "comp.hashCode : "+ this.hashCode());
         if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
             if (openset.contains(cells[crow][ccol]))
                 openset.remove(cells[crow][ccol]);
@@ -106,8 +99,6 @@ public class MapComp extends JComponent implements Cloneable {
     }
 
     public void addToClose(int crow, int ccol) {
-        printThread("addToClose method");
-        printThread("hashCode : "+ cells[crow][ccol].hashCode() + " comp.hashCode : "+ this.hashCode());
         if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
             if (!closedset.contains(cells[crow][ccol]))
                 closedset.add(cells[crow][ccol]);
@@ -649,7 +640,7 @@ public class MapComp extends JComponent implements Cloneable {
             colorForDestination = new Color(76, 32, 244);
             colorForObstacles = Color.BLACK;
             colorForSource = Color.GREEN;
-            colorForCellInPath = new Color(21, 17, 82);
+            colorForCellInPath = new Color(9, 72, 9);
         }
 
         @Override

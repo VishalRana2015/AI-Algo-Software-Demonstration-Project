@@ -34,8 +34,6 @@ public class BestFirstSearchRunnable implements AlgoRunnerRunnable {
 
     @Override
     public void run() {
-        mapComp.setStatus("Running BSF...");
-        System.out.println("hashCode : " + mapComp.hashCode());
         int rows, cols;
         rows = mapComp.getRows();
         cols = mapComp.getCols();

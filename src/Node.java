@@ -41,6 +41,7 @@ public class Node {
         return "Node{" +
                 "nrow=" + row +
                 ", ncol=" + col +
+                ", distance=" + distance +
                 '}';
     }
 
