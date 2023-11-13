@@ -21,23 +21,25 @@ public class MapComp extends JComponent implements Cloneable {
             }
         }
         if (src != null)
-            comp.src = comp.cells[ this.src.row][this.src.col];
+            comp.src = comp.cells[this.src.row][this.src.col];
 
         if (dst != null)
             comp.dst = comp.cells[this.dst.row][this.dst.col];
 
-        comp.obstacles = new LinkedList<>();
+        comp.obstacles = new LinkedHashSet<>();
+
         if (obstacles != null) {
-            for (int i = 0; i < obstacles.size(); i++) {
-                Cell obstacle =obstacles.get(i);
-                comp.obstacles.add( comp.cells[obstacle.row][obstacle.col]);
+            Iterator<Cell> itr = obstacles.iterator();
+            while (itr.hasNext()) {
+                Cell obstacle = itr.next();
+                comp.obstacles.add(comp.cells[obstacle.row][obstacle.col]);
             }
         }
         comp.manager = new MapCompLayoutManager();
         comp.setBackground(Color.BLACK);
-        comp.changeListener =new Vector<>();
+        comp.changeListener = new Vector<>();
         comp.setLayout(manager);
-        comp.setDim(rows,cols);
+        comp.setDim(rows, cols);
         comp.addMouseListener(listener);
         comp.delay = this.delay;
         return comp;
@@ -56,7 +58,7 @@ public class MapComp extends JComponent implements Cloneable {
     int delay = 100;
     Cell src;
     Cell dst;
-    LinkedList<Cell> obstacles = new LinkedList<Cell>();
+    LinkedHashSet<Cell> obstacles = new LinkedHashSet<>();
     HashSet<Cell> openset = new HashSet<Cell>();
     HashSet<Cell> closedset = new HashSet<Cell>();
     HashSet<Cell> pathset = new HashSet<Cell>();
@@ -79,17 +81,26 @@ public class MapComp extends JComponent implements Cloneable {
         this.addMouseListener(listener);
     }
 
-    public void addToOpen(int crow, int ccol) {
+    public void addToOpen(int crow, int ccol) throws RuntimeException {
         if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
+            if (obstacles.contains(cells[crow][ccol])) {
+                throw new RuntimeException(cells[crow][ccol] + " is an obstacle and can't be added to openList");
+            }
+            if (closedset.contains(cells[crow][ccol])) {
+                throw new RuntimeException(cells[crow][ccol] + " belongs to closed list and therefore can't be added to openList at the same time. First remove it from the closeList");
+            }
             if (!openset.contains(cells[crow][ccol]))
                 openset.add(cells[crow][ccol]);
+        } else {
+            throw new RuntimeException("Values (" + crow + "," + ccol + ") out of range (" + rows + ", " + cols + ")");
         }
         repaint();
     }
 
-    public void setAlgoRunnerRunnable(AlgoRunnerRunnable algoRunnerRunnable){
+    public void setAlgoRunnerRunnable(AlgoRunnerRunnable algoRunnerRunnable) {
         this.algoRunnerRunnable = algoRunnerRunnable;
     }
+
     public void removeFromOpen(int crow, int ccol) {
         if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
             if (openset.contains(cells[crow][ccol]))
@@ -100,16 +111,16 @@ public class MapComp extends JComponent implements Cloneable {
 
     public void addToClose(int crow, int ccol) {
         if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
+            if (obstacles.contains(cells[crow][ccol])) {
+                throw new RuntimeException(cells[crow][ccol] + " is an obstacle and can't be added to openList");
+            }
+            if (openset.contains(cells[crow][ccol])) {
+                throw new RuntimeException(cells[crow][ccol] + " belongs to closed list and therefore can't be added to openList at the same time. First remove it from the closeList");
+            }
             if (!closedset.contains(cells[crow][ccol]))
                 closedset.add(cells[crow][ccol]);
-        }
-        repaint();
-    }
-
-    public void removeFromClose(int crow, int ccol) {
-        if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
-            if (openset.contains(cells[crow][ccol]))
-                openset.remove(cells[crow][ccol]);
+        } else {
+            throw new RuntimeException("Values (" + crow + "," + ccol + ") out of range (" + rows + ", " + cols + ")");
         }
         repaint();
     }
@@ -310,18 +321,23 @@ public class MapComp extends JComponent implements Cloneable {
         return false;
     }
 
+    public void clearObstacles() {
+        obstacles = new LinkedHashSet<>();
+        repaint();
+    }
+
     protected void removeObstacle(Cell cell) {
         if (obstacles.contains(cell))
             obstacles.remove(cell);
         repaint();
     }
 
-    protected void setObstacles(LinkedList<Cell> list) {
+    protected void setObstacles(LinkedHashSet<Cell> list) {
         obstacles = list;
         repaint();
     }
 
-    protected LinkedList<Cell> getObstacles() {
+    protected LinkedHashSet<Cell> getObstacles() {
         return obstacles;
     }
 
@@ -731,8 +747,6 @@ public class MapComp extends JComponent implements Cloneable {
             this.repaint();
         }
 
-        int i = 10;
-
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -814,6 +828,14 @@ public class MapComp extends JComponent implements Cloneable {
                 dim = new Dimension(group.getW(), group.getH());
             }
             return dim;
+        }
+
+        @Override
+        public String toString() {
+            return "Cell{" +
+                    "row=" + row +
+                    ", col=" + col +
+                    '}';
         }
     }
 
