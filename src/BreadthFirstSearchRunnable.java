@@ -1,52 +1,22 @@
 import java.sql.Array;
 import java.util.*;
 
-public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
-    boolean exit;
-    int delay;
-    MapComp mapComp;
-
-    @Override
-    public boolean takeExit() {
-        return this.exit;
-    }
-
-    @Override
-    public void setExit(boolean exit) {
-        this.exit = exit;
-    }
-
-    @Override
-    public int getDelay() {
-        return this.delay;
-    }
-
-    @Override
-    public void setDelay(int delay) {
-        this.delay = delay;
-    }
+public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
 
     BreadthFirstSearchRunnable(MapComp mapComp) {
-        this.mapComp = mapComp;
-        this.delay = mapComp.getDelay();
-        this.exit = false;
+        super(mapComp);
     }
 
     @Override
     public void run() {
         // clearing data from the component if any
         mapComp.clear();
-        int rows, cols;
-        rows = mapComp.getRows();
-        cols = mapComp.getCols();
-        boolean[][] visited = new boolean[rows][cols];
+        boolean[][] visited = new boolean[mapComp.getRows()][mapComp.getCols()];
 
         // Nodes created and initialized
         int startingCellRow, startingCellColumn, destinationCellRow, destinationCellColumn; // stands for sourceRow, sourceColumn , destinationRow, destinationColumn
         startingCellRow = mapComp.getSrcRow();
         startingCellColumn = mapComp.getSrcCol();
-        destinationCellRow = mapComp.getDstRow();
-        destinationCellColumn = mapComp.getDstCol();
         LinkedList<Node> openList = new LinkedList<>();
         openList.add(new Node(startingCellRow, startingCellColumn));
         ArrayList<Node> nextLevelNodeList = new ArrayList<>();
@@ -85,7 +55,7 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
                 continue;
             }
             visited[currentNode.getRow()][currentNode.getCol()] = true;
-            if (goalTest(currentNode, destinationCellRow, destinationCellColumn)) {
+            if (goalTest(currentNode)) {
                 LinkedList<Node> list = reconstructPath(currentNode);
                 // set the path and return
                 int[] rowarray = new int[list.size()];
@@ -101,14 +71,13 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
                 mapComp.setPath(rowarray, colarray);
                 return;
             }
-            LinkedList<Node> neighbourList = moveGen4neighbour(currentNode, rows, cols);
+            HashSet<Node> neighbourList = moveGen4Neighbour(currentNode);
             Iterator<Node> itr = neighbourList.iterator();
             while (itr.hasNext()) {
                 Node node = itr.next();
                 if (visited[node.getRow()][node.getCol()]) {
                     itr.remove();
                 } else {
-                    node.setParent(currentNode);
                     mapComp.addToOpen(node.getRow(), node.getCol());
                 }
             }
@@ -116,86 +85,11 @@ public class BreadthFirstSearchRunnable implements AlgoRunnerRunnable {
             mapComp.removeFromOpen(currentNode.getRow(), currentNode.getCol());
             mapComp.addToClose(currentNode.getRow(), currentNode.getCol());
             try {
-                Thread.sleep(getDelay());
+                Thread.sleep(mapComp.getDelay());
             } catch (Exception e) {
                 System.out.println("Exception caught :" + e.getMessage());
             }
         }
-    }
-
-//    private LinkedList<Node> moveGen8neighbour(Node N) {
-//        LinkedList<Node> set = new LinkedList<Node>();
-//        int nrow, ncol; // stands for newRow , newColumn
-//        int Nrow, Ncol;
-//        Nrow = N.getRow();
-//        Ncol = N.getCol();
-//        for (int i = 0; i < 3; i++) {
-//            for (int j = 0; j < 3; j++) {
-//                nrow = Nrow - 1 + i;
-//                ncol = Ncol - 1 + j;
-//                if (nrow >= 0 && nrow < rows && ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol))
-//                    set.add(nodes[nrow][ncol]);
-//
-//            }
-//        }
-//        // end of loop
-//        return set;
-//    }
-
-    private LinkedList<Node> moveGen4neighbour(Node currentNode, int rows, int cols) {
-        LinkedList<Node> neighbourList = new LinkedList<>();
-        int nrow, ncol; // stands for nextCellRow and nextCellColumn
-        int currentCellRow, currentCellColumn; //
-        currentCellRow = currentNode.getRow();
-        currentCellColumn = currentNode.getCol();
-        nrow = currentCellRow - 1;
-        ncol = currentCellColumn;
-        // north
-        if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            Node nn = new Node(nrow, ncol);
-            nn.setDistance(currentNode.getDistance() + 1);
-            neighbourList.add(nn);
-        }
-        // east
-        nrow = currentCellRow;
-        ncol = currentCellColumn + 1;
-        if (ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            Node nn = new Node(nrow, ncol);
-            nn.setDistance(currentNode.getDistance() + 1);
-            neighbourList.add(nn);
-        }
-        // south
-        ncol = currentCellColumn;
-        nrow = currentCellRow + 1;
-        if (nrow >= 0 && nrow < rows && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            Node nn = new Node(nrow, ncol);
-            nn.setDistance(currentNode.getDistance() + 1);
-            neighbourList.add(nn);
-        }
-        // west
-        nrow = currentCellRow;
-        ncol = currentCellColumn - 1;
-        if (ncol >= 0 && ncol < cols && !mapComp.isObstacleHaveCell(nrow, ncol)) {
-            Node nn = new Node(nrow, ncol);
-            nn.setDistance(currentNode.getDistance() + 1);
-            neighbourList.add(nn);
-        }
-        return neighbourList;
-    }
-
-    private boolean goalTest(Node currentNode, int destinationRow, int destinationColumn) {
-        if (currentNode.getRow() == destinationRow && currentNode.getCol() == destinationColumn)
-            return true;
-        return false;
-    }
-
-    public LinkedList<Node> reconstructPath(Node node) {
-        LinkedList<Node> list = new LinkedList<Node>();
-        while (node != null) {
-            list.add(node);
-            node = node.getParent();
-        }
-        return list;
     }
 }
 

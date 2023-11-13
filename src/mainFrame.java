@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
 
@@ -196,10 +197,14 @@ public class mainFrame {
                     MapComp mapComp = new MapComp(rows, cols);
                     st = new StringTokenizer(bufferedReader.readLine());
                     int sourceRow = Integer.parseInt(st.nextToken()), sourceColumn = Integer.parseInt(st.nextToken());
+                    if ( sourceRow >= 0 && sourceColumn >= 0){
+                        mapComp.setSrc(sourceRow, sourceColumn);
+                    }
                     st = new StringTokenizer(bufferedReader.readLine());
                     int destinationRow = Integer.parseInt(st.nextToken()), destinationColumn = Integer.parseInt(st.nextToken());
-                    mapComp.setSrc(sourceRow, sourceColumn);
-                    mapComp.setDst(destinationRow, destinationColumn);
+                    if ( destinationRow >= 0 && destinationColumn >= 0){
+                        mapComp.setDst(destinationRow, destinationColumn);
+                    }
                     st = new StringTokenizer(bufferedReader.readLine());
                     int obstaclesCount = Integer.parseInt(st.nextToken());
                     for (int i = 0; i < obstaclesCount; i++) {
@@ -224,8 +229,8 @@ public class mainFrame {
         exportButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (comp.src == null || comp.dst == null) {
-                    statusLabel.setText("<html>Error: Source and Destination<br/>cells are required</html>");
+                if (comp.obstacles == null || comp.obstacles.size() == 0) {
+                    statusLabel.setText("<html>Error: There are no obstacles<br/> to be saved.</html>");
                     statusLabel.setForeground(ERROR_COLOR);
                     return;
                 }
@@ -242,11 +247,24 @@ public class mainFrame {
                     }
                     PrintWriter printWriter = new PrintWriter(file);
                     printWriter.write(comp.getRows() + " " + comp.getCols() + "\n");
-                    printWriter.write(comp.getSrcRow() + " " + comp.getSrcCol() + "\n");
-                    printWriter.write(comp.getDstRow() + " " + comp.getDstCol() + "\n");
+                    if ( comp.getSrc() != null) {
+                        printWriter.write(comp.getSrcRow() + " " + comp.getSrcCol() + "\n");
+                    }
+                    else{
+                        printWriter.write("-1 -1");
+                    }
+
+                    if ( comp.getDst() != null){
+                        printWriter.write(comp.getDstRow() + " " + comp.getDstCol() + "\n");
+                    }
+                    else{
+                        printWriter.write("-1 -1");
+                    }
                     printWriter.write(comp.obstacles.size() + "\n");
-                    for (int i = 0; i < comp.obstacles.size(); i++) {
-                        printWriter.write(comp.obstacles.get(i).getPosRow() + " " + comp.obstacles.get(i).getPosCol() + "\n");
+                    Iterator<MapComp.Cell> itr = comp.obstacles.iterator();
+                    while( itr.hasNext()) {
+                        MapComp.Cell obstacle = itr.next();
+                        printWriter.write(obstacle.getPosRow() + " " + obstacle.getPosCol() + "\n");
                     }
                     printWriter.close();
                     statusLabel.setText("<html>" + file.getName() + "<br/>Exported successfully" + "</html>");
@@ -391,9 +409,11 @@ public class mainFrame {
         JCheckBox checkSrc = new JCheckBox("Source");
         JCheckBox checkDst = new JCheckBox("Destination");
         JCheckBox checkObs = new JCheckBox("Obstacle");
+        JButton resetObstacles = new JButton("Reset");
         checkDst.setEnabled(false);
         checkSrc.setEnabled(false);
         checkObs.setEnabled(false);
+        resetObstacles.setEnabled(false);
         ButtonGroup group = new ButtonGroup();
         group.add(checkDst);
         group.add(checkSrc);
@@ -407,6 +427,7 @@ public class mainFrame {
                     checkDst.setEnabled(true);
                     checkSrc.setEnabled(true);
                     checkObs.setEnabled(true);
+                    resetObstacles.setEnabled(true);
                     button.setText("Stop Editing");
                     comp.setEditMode(true);
                 } else {
@@ -414,6 +435,7 @@ public class mainFrame {
                     checkObs.setEnabled(false);
                     checkSrc.setEnabled(false);
                     button.setText("Edit City");
+                    resetObstacles.setEnabled(false);
                     comp.setEditMode(false);
                 }
             }
@@ -444,6 +466,12 @@ public class mainFrame {
                     comp.setMode(MapComp.SETOBSTACLEMODE);
             }
         });
+        resetObstacles.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                comp.clearObstacles();
+            }
+        });
         cont.gridwidth = 3;
         cont.anchor = GridBagConstraints.CENTER;
         cont.gridx = 0;
@@ -456,6 +484,12 @@ public class mainFrame {
         editpanel.add(checkObs, cont);
         cont.gridx = 2;
         editpanel.add(checkDst, cont);
+        cont.gridwidth = 3;
+        cont.anchor = GridBagConstraints.CENTER;
+        cont.gridy = 2;
+        cont.gridx = 0;
+        editpanel.add(resetObstacles, cont);
+        resetObstacles.setMinimumSize(resetObstacles.getPreferredSize());
         editpanel.setMaximumSize(editpanel.getPreferredSize());
         panel.add(editpanel);
         JSeparator separator5 = new JSeparator();
