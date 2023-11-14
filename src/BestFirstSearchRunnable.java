@@ -47,7 +47,7 @@ public class BestFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                 mapComp.setPath(rowarray, colarray);
                 return;
             }
-            HashSet<Node> neighbourSet = moveGen4Neighbour(currentNode);  // It never returns an obstacle as a neighbour cell.
+            HashSet<Node> neighbourSet = getNeighbours(currentNode);  // It never returns an obstacle as a neighbour cell.
             visited[currentNode.getRow()][currentNode.getCol()] = true;
             // remove cell of openList
             mapComp.removeFromOpen(currentNode.getRow(), currentNode.getCol());

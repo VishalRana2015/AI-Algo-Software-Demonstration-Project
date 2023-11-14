@@ -7,6 +7,7 @@ import java.util.ListIterator;
 import java.util.*;
 
 public class MapComp extends JComponent implements Cloneable {
+
     @Override
     protected Object clone() throws CloneNotSupportedException {
         MapComp comp = new MapComp();
@@ -42,9 +43,12 @@ public class MapComp extends JComponent implements Cloneable {
         comp.setDim(rows, cols);
         comp.addMouseListener(listener);
         comp.delay = this.delay;
+        comp.setFourDir(this.isFourDir());
         return comp;
     }
 
+    // if set to true, a cell has four neighbors in north, east, south and west directions, otherwise all eight cells
+    private boolean fourDir ;
     private CellGroup group;
     private Cell[][] cells;
     private int rows, cols;
@@ -79,8 +83,15 @@ public class MapComp extends JComponent implements Cloneable {
         this.setLayout(manager);
         this.setDim(rows, cols);
         this.addMouseListener(listener);
+        this.fourDir = true;
     }
 
+    public void setFourDir(boolean fourDir){
+        this.fourDir = fourDir;
+    }
+    public boolean isFourDir(){
+        return this.fourDir;
+    }
     public void addToOpen(int crow, int ccol) throws RuntimeException {
         if ((crow >= 0 && crow < rows) & (ccol >= 0 && ccol < cols)) {
             if (obstacles.contains(cells[crow][ccol])) {

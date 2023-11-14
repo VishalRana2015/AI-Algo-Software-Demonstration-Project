@@ -20,15 +20,29 @@ public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
         LinkedList<Node> openList = new LinkedList<>();
         openList.add(new Node(startingCellRow, startingCellColumn));
         ArrayList<Node> nextLevelNodeList = new ArrayList<>();
+        int level = 0;
         while (!exit) {
             if (openList.isEmpty()) {
+                level ++;
+                System.out.println("Current level + : "+ level);
+                // remove all nodes whose distance value is greater than the current level
+                Iterator<Node> itr =nextLevelNodeList.iterator();
+                while (itr.hasNext()){
+                    Node node = itr.next();
+                    System.out.print(node.getDistance() + ", " );
+                    if ( node.getDistance() > level){
+                        System.out.println("removing ");
+                        itr.remove();
+                    }
+                }
+                System.out.println();
                 if (nextLevelNodeList.isEmpty()) {
                     exit = true;
                     continue;
                 }
                 // split this list in two parts
                 ArrayList<Node> firstPart = new ArrayList<>(), secondPart = new ArrayList<>();
-                Iterator<Node> itr = nextLevelNodeList.iterator();
+                itr = nextLevelNodeList.iterator();
                 while (itr.hasNext()) {
                     Node node = itr.next();
                     if (visited[node.getRow()][node.getCol()]) {
@@ -42,9 +56,35 @@ public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                     }
                 }
                 // sort first in descending order of column values.
-                firstPart.sort((Node n1, Node n2) -> n1.getRow() - n2.getRow());
+                firstPart.sort((Node n1, Node n2) -> {
+                    if ( n1.getRow() < n2.getRow()){
+                        return -1;
+                    }
+                    else if ( n1.getRow() == n2.getRow()){
+                        if ( n1.getRow() < startingCellRow) {
+                            return n1.getCol() - n2.getCol();
+                        }
+                        else{
+                            return n2.getCol() - n1.getCol();
+                        }
+                    }
+                    return 1;
+                });
                 // sort second part in increasing order of column values
-                secondPart.sort((Node n1, Node n2) -> n2.getRow() - n1.getRow());
+                secondPart.sort((Node n1, Node n2) -> {
+                    if ( n2.getRow() < n1.getRow()){
+                        return -1;
+                    }
+                    else if ( n2.getRow() == n1.getRow()){
+                        if ( n2.getRow() < startingCellRow){
+                            return n1.getCol()- n2.getCol();
+                        }
+                        else{
+                            return n2.getCol() - n1.getCol();
+                        }
+                    }
+                    return 1;
+                });
                 openList.addAll(firstPart); // it automatically makes add the elements in the same order as they are in the arrayList.
                 openList.addAll(secondPart);
                 nextLevelNodeList = new ArrayList<>();
@@ -55,6 +95,8 @@ public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                 continue;
             }
             visited[currentNode.getRow()][currentNode.getCol()] = true;
+            mapComp.removeFromOpen(currentNode.getRow(), currentNode.getCol());
+            mapComp.addToClose(currentNode.getRow(), currentNode.getCol());
             if (goalTest(currentNode)) {
                 LinkedList<Node> list = reconstructPath(currentNode);
                 // set the path and return
@@ -71,7 +113,7 @@ public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                 mapComp.setPath(rowarray, colarray);
                 return;
             }
-            HashSet<Node> neighbourList = moveGen4Neighbour(currentNode);
+            HashSet<Node> neighbourList = getNeighbours(currentNode);
             Iterator<Node> itr = neighbourList.iterator();
             while (itr.hasNext()) {
                 Node node = itr.next();
@@ -82,8 +124,6 @@ public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                 }
             }
             nextLevelNodeList.addAll(neighbourList);
-            mapComp.removeFromOpen(currentNode.getRow(), currentNode.getCol());
-            mapComp.addToClose(currentNode.getRow(), currentNode.getCol());
             try {
                 Thread.sleep(mapComp.getDelay());
             } catch (Exception e) {
