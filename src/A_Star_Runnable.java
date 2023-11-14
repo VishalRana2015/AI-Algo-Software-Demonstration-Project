@@ -33,8 +33,16 @@ public class A_Star_Runnable extends AlgoRunnerRunnableImpl {
             return value1 - value2;
         };
 
+        Comparator<Node> node8DirComparator = (Node n1, Node n2 ) ->{
+            int rowDistance1 = Math.abs(n1.getRow() - destinationRow), columnDistance1 = Math.abs(n1.getCol() - destinationColumn);
+            int rowDistance2 = Math.abs(n1.getRow() - destinationRow), columnDistance2 = Math.abs(n1.getCol() - destinationColumn);
+            int nodeDistance1 = (rowDistance1 >columnDistance1)?rowDistance1:columnDistance1;
+            int nodeDistance2 = (rowDistance2 > columnDistance2)?rowDistance2:columnDistance2;
+            return nodeDistance1-nodeDistance2;
+        };
+
         mapComp.clear();
-        PriorityQueue<Node> openQueue = new PriorityQueue<>(nodeManhattanComparator);
+        PriorityQueue<Node> openQueue = new PriorityQueue<>( (mapComp.isFourDir())?nodeManhattanComparator:node8DirComparator);
         Node startingNode = new Node(sourceRow, sourceColumn);
         openQueue.add(startingNode);
         startingNode.setDistance(0);
@@ -67,7 +75,7 @@ public class A_Star_Runnable extends AlgoRunnerRunnableImpl {
             mapComp.addToClose(currentNode.getRow(), currentNode.getCol());
             // Now the closed list is also updated
             visited[currentNode.getRow()][currentNode.getCol()] = true;
-            HashSet<Node> neighbourSet = moveGen4Neighbour(currentNode);
+            HashSet<Node> neighbourSet = getNeighbours(currentNode);
             Iterator<Node> itr = neighbourSet.iterator();
             while (itr.hasNext()) {
                 Node node = itr.next();

@@ -24,6 +24,13 @@ public abstract class AlgoRunnerRunnableImpl implements AlgoRunnerRunnable{
         this.exit = false;
     }
 
+    public HashSet<Node> getNeighbours(Node currentNode){
+        if ( mapComp.isFourDir()){
+            return moveGen4Neighbour(currentNode);
+        }
+        return moveGen8Neighbour(currentNode);
+    }
+
 
     // In clock wise direction starting from north-West
     public HashSet<Node> moveGen8Neighbour(Node currentNode) {
@@ -37,8 +44,7 @@ public abstract class AlgoRunnerRunnableImpl implements AlgoRunnerRunnable{
                 nrow = Nrow - 1 + i;
                 ncol = Ncol - 1 + j;
                 if (nrow >= 0 && nrow < mapComp.getRows() && ncol >= 0 && ncol < mapComp.getCols() && !mapComp.isObstacleHaveCell(nrow, ncol))
-                    set.add(new Node(nrow, ncol));
-
+                    addCell(currentNode, nrow, ncol, set);
             }
         }
         // end of loop
@@ -82,7 +88,7 @@ public abstract class AlgoRunnerRunnableImpl implements AlgoRunnerRunnable{
         return set;
     }
 
-    private void addCell(Node currentNode, int nrow, int ncol, LinkedHashSet<Node> set){
+    protected void addCell(Node currentNode, int nrow, int ncol, LinkedHashSet<Node> set){
         Node nn = new Node(nrow, ncol);
         nn.setParent(currentNode);
         nn.setDistance(currentNode.getDistance() + 1);

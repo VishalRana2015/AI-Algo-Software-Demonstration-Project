@@ -41,7 +41,7 @@ public class DepthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                 mapComp.setPath(rowarray, colarray);
                 return;
             }
-            HashSet<Node> neighbours = moveGen4Neighbour(currentNode);
+            HashSet<Node> neighbours = getNeighbours(currentNode);
             visited[currentNode.getRow()][currentNode.getCol()] = true;
             // remove current node from open list
             mapComp.removeFromOpen(currentNode.getRow(), currentNode.getCol());
@@ -51,9 +51,9 @@ public class DepthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
             Iterator<Node> itr = neighbours.iterator();
             while (itr.hasNext()) {
                 Node node = itr.next();
-                if ( visited[node.getRow()][node.getCol()]){
+                if (visited[node.getRow()][node.getCol()]) {
                     itr.remove();
-                }else {
+                } else {
                     openStack.add(node);
                     mapComp.addToOpen(node.getRow(), node.getCol());
                 }
@@ -67,25 +67,6 @@ public class DepthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
 
     }
 
-    @Override
-    public HashSet<Node> moveGen8Neighbour(Node currentNode) {
-        LinkedHashSet<Node> set = new LinkedHashSet<>();
-        int nrow, ncol; // stands for newRow , newColumn
-        int Nrow, Ncol;
-        Nrow = currentNode.getRow();
-        Ncol = currentNode.getCol();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                nrow = Nrow - 1 + i;
-                ncol = Ncol - 1 + j;
-                if (nrow >= 0 && nrow < mapComp.getRows() && ncol >= 0 && ncol < mapComp.getCols() && !mapComp.isObstacleHaveCell(nrow, ncol))
-                    set.add(new Node(nrow, ncol));
-
-            }
-        }
-        // end of loop
-        return set;
-    }
 
     @Override
     public HashSet<Node> moveGen4Neighbour(Node currentNode) {
@@ -98,36 +79,28 @@ public class DepthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
         neighbourColumn = currentCellColumn - 1;
         // west
         if (neighbourColumn >= 0 && neighbourColumn < mapComp.getCols() && !mapComp.isObstacleHaveCell(neighbourRow, neighbourColumn)) {
-            Node nn = new Node(neighbourRow, neighbourColumn);
-            nn.setDistance(currentNode.getDistance() + 1);
-            set.add(nn);
+            addCell(currentNode, neighbourRow, neighbourColumn, set);
         }
 
         neighbourRow = currentCellRow - 1;
         neighbourColumn = currentCellColumn;
         // north
         if (neighbourRow >= 0 && neighbourRow < mapComp.getRows() && !mapComp.isObstacleHaveCell(neighbourRow, neighbourColumn)) {
-            Node nn = new Node(neighbourRow, neighbourColumn);
-            nn.setDistance(currentNode.getDistance() + 1);
-            set.add(nn);
+            addCell(currentNode, neighbourRow, neighbourColumn, set);
         }
         neighbourRow = currentCellRow;
         neighbourColumn = currentCellColumn + 1;
 
         //east
         if (neighbourColumn >= 0 && neighbourColumn < mapComp.getCols() && !mapComp.isObstacleHaveCell(neighbourRow, neighbourColumn)) {
-            Node nn = new Node(neighbourRow, neighbourColumn);
-            nn.setDistance(currentNode.getDistance() + 1);
-            set.add(nn);
+            addCell(currentNode, neighbourRow, neighbourColumn, set);
         }
         neighbourRow = currentCellRow + 1;
         neighbourColumn = currentCellColumn;
 
         //south
         if (neighbourRow >= 0 && neighbourRow < mapComp.getRows() && !mapComp.isObstacleHaveCell(neighbourRow, neighbourColumn)) {
-            Node nn = new Node(neighbourRow, neighbourColumn);
-            nn.setDistance(currentNode.getDistance() + 1);
-            set.add(nn);
+            addCell(currentNode, neighbourRow, neighbourColumn, set);
         }
         return set;
     }

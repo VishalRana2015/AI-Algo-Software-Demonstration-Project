@@ -9,7 +9,6 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.StringTokenizer;
-import java.util.jar.JarEntry;
 
 public class mainFrame {
     public static MapComp comp;
@@ -20,6 +19,8 @@ public class mainFrame {
     private static Thread thread;
     private static JComboBox<String> list;
     public static JLabel statusLabel;
+    private static JButton fourDirButton, eightDirButton;
+    private static boolean IS_FOUR_DIR_ENABLED = true;
 
     // static values
 
@@ -378,7 +379,48 @@ public class mainFrame {
         separator8.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator8.getPreferredSize().getHeight()));
         panel.add(separator8);
         panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
+        JPanel dirPanel = new JPanel();
+        dirPanel.setLayout(new GridBagLayout());
+        JLabel clickToDisableLable = new JLabel("Click to Disable");
+        cont.gridwidth = 2;
+        cont.anchor = GridBagConstraints.FIRST_LINE_START;
+        cont.gridx = 0;
+        cont.gridy = 0;
+        dirPanel.add(clickToDisableLable, cont);
+        fourDirButton = new JButton("Four");
+        eightDirButton = new JButton("Eight");
+        cont.gridy =1;
+        cont.gridx = 1;
+        dirPanel.add(fourDirButton, cont);
+        cont.gridx = 2;
+        dirPanel.add(eightDirButton, cont);
+        dirPanel.setMaximumSize(dirPanel.getPreferredSize());
+        dirPanel.setMinimumSize(dirPanel.getPreferredSize());
+        panel.add(dirPanel);
+        fourDirButton.setEnabled(IS_FOUR_DIR_ENABLED);
+        fourDirButton.setMinimumSize(fourDirButton.getPreferredSize());
+        fourDirButton.setMaximumSize(fourDirButton.getPreferredSize());
 
+        eightDirButton.setEnabled(!IS_FOUR_DIR_ENABLED);
+        eightDirButton.setMinimumSize(eightDirButton.getPreferredSize());
+        eightDirButton.setMaximumSize(eightDirButton.getMaximumSize());
+        ActionListener dirActionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                IS_FOUR_DIR_ENABLED = !IS_FOUR_DIR_ENABLED;
+                fourDirButton.setEnabled(IS_FOUR_DIR_ENABLED);
+                eightDirButton.setEnabled(!IS_FOUR_DIR_ENABLED);
+                comp.setFourDir(IS_FOUR_DIR_ENABLED);
+            }
+        };
+        fourDirButton.addActionListener(dirActionListener);
+        eightDirButton.addActionListener(dirActionListener);
+        comp.setFourDir(IS_FOUR_DIR_ENABLED);
+        panel.add(panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT)));
+        JSeparator separator7= new JSeparator(JSeparator.HORIZONTAL);
+        separator7.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator8.getPreferredSize().getHeight()));
+        panel.add(separator7);
+        panel.add(panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT)));
         list = new JComboBox();
         list.addItem("Best First Search");
         list.addItem("Breadth First Search");
