@@ -1,3 +1,4 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.event.*;
@@ -7,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
@@ -379,31 +381,36 @@ public class mainFrame {
         separator8.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) separator8.getPreferredSize().getHeight()));
         panel.add(separator8);
         panel.add(Box.createVerticalStrut(VERTICAL_STRUCT_HEIGHT));
-        JPanel dirPanel = new JPanel();
-        dirPanel.setLayout(new GridBagLayout());
-        JLabel clickToDisableLable = new JLabel("Click to Disable");
+        JPanel directionPanel = new JPanel();
+        directionPanel.setLayout(new GridBagLayout());
+        JLabel clickToDisableLable = new JLabel("<html>Select adjacent cells direction<br/>Click to Disable</html>");
         cont.gridwidth = 2;
         cont.anchor = GridBagConstraints.FIRST_LINE_START;
         cont.gridx = 0;
         cont.gridy = 0;
-        dirPanel.add(clickToDisableLable, cont);
-        fourDirButton = new JButton("Four");
-        eightDirButton = new JButton("Eight");
+        directionPanel.add(clickToDisableLable, cont);
+        fourDirButton = new JButton();
+        eightDirButton = new JButton();
         cont.gridy =1;
         cont.gridx = 1;
-        dirPanel.add(fourDirButton, cont);
+        cont.anchor = GridBagConstraints.CENTER;
+        directionPanel.add(fourDirButton, cont);
         cont.gridx = 2;
-        dirPanel.add(eightDirButton, cont);
-        dirPanel.setMaximumSize(dirPanel.getPreferredSize());
-        dirPanel.setMinimumSize(dirPanel.getPreferredSize());
-        panel.add(dirPanel);
+        cont.anchor = GridBagConstraints.CENTER;
+        directionPanel.add(eightDirButton, cont);
+        directionPanel.setMinimumSize(directionPanel.getPreferredSize());
+        directionPanel.setMaximumSize(new Dimension(300, (int)directionPanel.getPreferredSize().getHeight()));
+        panel.add(directionPanel);
         fourDirButton.setEnabled(IS_FOUR_DIR_ENABLED);
+        Dimension buttonSize = new Dimension(80,80);
+        fourDirButton.setPreferredSize(buttonSize);
         fourDirButton.setMinimumSize(fourDirButton.getPreferredSize());
         fourDirButton.setMaximumSize(fourDirButton.getPreferredSize());
 
         eightDirButton.setEnabled(!IS_FOUR_DIR_ENABLED);
+        eightDirButton.setPreferredSize(buttonSize);
         eightDirButton.setMinimumSize(eightDirButton.getPreferredSize());
-        eightDirButton.setMaximumSize(eightDirButton.getMaximumSize());
+        eightDirButton.setMaximumSize(eightDirButton.getPreferredSize());
         ActionListener dirActionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -413,6 +420,27 @@ public class mainFrame {
                 comp.setFourDir(IS_FOUR_DIR_ENABLED);
             }
         };
+        try{
+            File fourFile = new File("resources/four.png");
+            File eightFile = new File("resources/eight.png");
+            Image fourPhoto = ImageIO.read(fourFile);
+            Image eightPhoto = ImageIO.read(eightFile);
+            System.out.println("images has been read");
+            System.out.println(fourDirButton.getWidth());
+            fourPhoto= fourPhoto.getScaledInstance((int)buttonSize.getWidth(),(int)buttonSize.getHeight(), Image.SCALE_DEFAULT);
+            eightPhoto = eightPhoto.getScaledInstance( (int) buttonSize.getWidth(), (int)buttonSize.getHeight(), Image.SCALE_DEFAULT);
+
+            System.out.println("images scaled down to button size");
+            fourDirButton.setIcon(new ImageIcon(fourPhoto));
+            eightDirButton.setIcon(new ImageIcon(eightPhoto));
+            fourDirButton.setHorizontalAlignment(SwingConstants.CENTER);
+            eightDirButton.setHorizontalAlignment(SwingConstants.CENTER);
+            System.out.println("Icon loaded");
+        }
+        catch(Exception exp){
+            System.out.println("Excpetion caught");
+            System.out.println(exp.getMessage());
+        }
         fourDirButton.addActionListener(dirActionListener);
         eightDirButton.addActionListener(dirActionListener);
         comp.setFourDir(IS_FOUR_DIR_ENABLED);
