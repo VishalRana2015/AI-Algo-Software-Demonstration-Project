@@ -17,7 +17,7 @@ A cell have its neighbour in North, East, South and West direction (Only four di
 
 <br/>
 We can also choose a cell to have eight neighbour instead of 4, as shown below. <br/>
-
+<img src="https://github.com/VishalRana2015/AI-Algo-Software-Demonstration-Project/blob/optimize/images/AStarEight.gif" alt="A* Eight"/><br/>
 ![AStarEight.gif](/images/AStarEight.gif)
 
 A* Star always find the shortest path to destination.<br/>
