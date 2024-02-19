@@ -13,8 +13,8 @@ I have implemented following four algorithms <br/>
 <h2>Demonstrating A* Star</h2> <br/>
 In the following image, it shows the path between source and destination found using A* Star Algorithm.<br/>
 A cell has its neighbour in North, East, South and West direction (Only four direction).<br/>
-![AStarFour](https://github.com/VishalRana2015/AI-Algo-Software-Demonstration-Project/assets/69715143/39c0c49b-7792-43cb-9903-449926800ab9)
 
+![AStarFour](https://github.com/VishalRana2015/AI-Algo-Software-Demonstration-Project/assets/69715143/4e32206b-97b1-4ac8-a416-0b5b053fcf78)
 
 <br/>
 We can also choose a cell to have eight neighbour instead of 4, as shown below. <br/>
