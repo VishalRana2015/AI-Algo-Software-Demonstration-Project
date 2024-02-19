@@ -11,13 +11,15 @@ I have implemented following four algorithms <br/>
 </ul>
 
 <h2>Demonstrating A* Star</h2> <br/>
-In the following image, it finds path between source and destination using A* Star Algorithm.<br/>
-A cell have its neighbour in North, East, South and West direction (Only four direction).<br/>
-![AStarFour.gif](/images/AStarFour.gif)
+In the following image, it shows the path between source and destination found using A* Star Algorithm.<br/>
+A cell has its neighbour in North, East, South and West direction (Only four direction).<br/>
+![AStarFour](https://github.com/VishalRana2015/AI-Algo-Software-Demonstration-Project/assets/69715143/39c0c49b-7792-43cb-9903-449926800ab9)
+
 
 <br/>
 We can also choose a cell to have eight neighbour instead of 4, as shown below. <br/>
-![](https://github.com/VishalRana2015/AI-Algo-Software-Demonstration-Project/blob/optimize/images/AStarEight.gif)
+
+![AStarEight](https://github.com/VishalRana2015/AI-Algo-Software-Demonstration-Project/assets/69715143/569b31a1-dcb4-46ad-8d35-e55af43d3b7b)
 
 A* Star always find the shortest path to destination.<br/>
 
