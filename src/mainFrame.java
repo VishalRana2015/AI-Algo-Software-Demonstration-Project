@@ -8,9 +8,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.StringTokenizer;
+import java.util.jar.JarEntry;
 
 public class mainFrame {
     public static MapComp comp;
@@ -20,7 +21,7 @@ public class mainFrame {
     private static JFrame frame;
     private static Thread thread;
     private static JComboBox<String> list;
-    public static JLabel statusLabel;
+    public static JLabel statusLabel, mapStatus;
     private static JButton fourDirButton, eightDirButton;
     private static boolean IS_FOUR_DIR_ENABLED = true;
 
@@ -95,12 +96,15 @@ public class mainFrame {
                 pane.setViewport(viewport);
 
                 viewpanel.add(pane);
-                JLabel status = new JLabel("Status");
-                status.setMaximumSize(status.getPreferredSize());
-                viewpanel.add(status);
+                JPanel footerPanel = new JPanel();
+                footerPanel.setLayout(new FlowLayout());
+                mapStatus = new JLabel("Status");
+                mapStatus.setMaximumSize(mapStatus.getPreferredSize());
                 JButton stop = new JButton("Stop");
                 stop.setMinimumSize(stop.getPreferredSize());
-                viewpanel.add(stop);
+                footerPanel.add(stop);
+                footerPanel.add(mapStatus);
+                viewpanel.add(footerPanel);
                 frame.setContentPane(viewpanel);
                 MapComp finalComp = comp2;
                 stop.addActionListener(new ActionListener() {
@@ -113,15 +117,18 @@ public class mainFrame {
                 });
 
                 frame.revalidate();
+                ArrayList<StatusListener<String>> statusListenerList = new ArrayList<>();
+                StatusListener<String> statusListener =new StatusListenerImpl<>(mapStatus);
+                statusListenerList.add(statusListener);
                 int i = list.getSelectedIndex();
                 if (i == AlgoDemo.BEST_FIRST_SEARCH) {
-                    AlgoDemo.runBestFirstSearch(comp2);
+                    AlgoDemo.runBestFirstSearch(comp2, statusListenerList);
                 } else if (i == AlgoDemo.BREADTH_FIRST_SEARCH) {
-                    AlgoDemo.runBreadthFirstSearch(comp2);
+                    AlgoDemo.runBreadthFirstSearch(comp2, statusListenerList);
                 } else if (i == AlgoDemo.DEPTH_FIRST_SEARCH) {
-                    AlgoDemo.runDepthFirstSearch(comp2);
+                    AlgoDemo.runDepthFirstSearch(comp2, statusListenerList);
                 } else if (i == AlgoDemo.A_STAR) {
-                    AlgoDemo.runAStarSearch(comp2);
+                    AlgoDemo.runAStarSearch(comp2, statusListenerList);
                 }
             }
         });

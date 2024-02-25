@@ -9,6 +9,8 @@ public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
 
     @Override
     public void run() {
+        String prefix = "BFS" ;
+        updateStatus(prefix + "Starting ...");
         // clearing data from the component if any
         mapComp.clear();
         boolean[][] visited = new boolean[mapComp.getRows()][mapComp.getCols()];
@@ -21,21 +23,22 @@ public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
         openList.add(new Node(startingCellRow, startingCellColumn));
         ArrayList<Node> nextLevelNodeList = new ArrayList<>();
         int level = 0;
+        updateStatus(prefix + "In Progress ...");
         while (!exit) {
             if (openList.isEmpty()) {
                 level ++;
-                System.out.println("Current level + : "+ level);
+                //System.out.println("Current level + : "+ level);
                 // remove all nodes whose distance value is greater than the current level
                 Iterator<Node> itr =nextLevelNodeList.iterator();
                 while (itr.hasNext()){
                     Node node = itr.next();
-                    System.out.print(node.getDistance() + ", " );
+                  //  System.out.print(node.getDistance() + ", " );
                     if ( node.getDistance() > level){
-                        System.out.println("removing ");
+                    //    System.out.println("removing ");
                         itr.remove();
                     }
                 }
-                System.out.println();
+              //  System.out.println();
                 if (nextLevelNodeList.isEmpty()) {
                     exit = true;
                     continue;
@@ -111,6 +114,7 @@ public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                     index++;
                 }
                 mapComp.setPath(rowarray, colarray);
+                updateStatus(prefix + "Destination found, path length: " + rowarray.length);
                 return;
             }
             HashSet<Node> neighbourList = getNeighbours(currentNode);
@@ -130,6 +134,7 @@ public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                 System.out.println("Exception caught :" + e.getMessage());
             }
         }
+        updateStatus(prefix + "Path not found");
     }
 }
 

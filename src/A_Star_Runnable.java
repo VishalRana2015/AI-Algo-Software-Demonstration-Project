@@ -9,7 +9,8 @@ public class A_Star_Runnable extends AlgoRunnerRunnableImpl {
     @Override
     public void run() {
         mapComp.setStatus("Running BSF...");
-        System.out.println("hashCode : " + mapComp.hashCode());
+        String prefix = "A* Star: ";
+        updateStatus(prefix + "Starting ...");
         int rows, cols;
         rows = mapComp.getRows();
         cols = mapComp.getCols();
@@ -47,6 +48,7 @@ public class A_Star_Runnable extends AlgoRunnerRunnableImpl {
         openQueue.add(startingNode);
         startingNode.setDistance(0);
         visited[sourceRow][sourceColumn] = false; // 1 stands for to be processed, 2 stands for has been processed, 0 stands for not considered to be processed yet.
+        updateStatus(prefix + "In Progress ...");
         while (!openQueue.isEmpty() && !exit) {
             Node currentNode = openQueue.remove();
             if (visited[currentNode.getRow()][currentNode.getCol()]) {
@@ -66,6 +68,7 @@ public class A_Star_Runnable extends AlgoRunnerRunnableImpl {
                     index++;
                 }
                 mapComp.setPath(rowarray, colarray);
+                updateStatus(prefix + "Destination Found, Path Length: " + rowarray.length);
                 return;
             }
 
@@ -91,7 +94,9 @@ public class A_Star_Runnable extends AlgoRunnerRunnableImpl {
                 Thread.sleep(mapComp.getDelay());
             } catch (Exception e) {
                 System.out.println("Exception caught :" + e.getMessage());
+                System.out.println("Something went wrong, " + e.getMessage());
             }
         }
+        updateStatus(prefix + "Path not found");
     }
 }

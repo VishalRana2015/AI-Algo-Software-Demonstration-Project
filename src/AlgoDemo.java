@@ -93,29 +93,41 @@ public class AlgoDemo {
             return Objects.hash(drow, dcol);
         }
     }
-    public static void runBestFirstSearch(MapComp mapComp){
+    public static void runBestFirstSearch(MapComp mapComp, ArrayList<StatusListener<String>> statusListenerList){
         BestFirstSearchRunnable runnable = new BestFirstSearchRunnable(mapComp);
+        for ( StatusListener<String> statusListener: statusListenerList){
+            runnable.addStatusListener(statusListener);
+        }
         Thread thread = new Thread(runnable);
         mapComp.setAlgoRunnerRunnable(runnable);
         thread.start();
     }
 
-    public static void runBreadthFirstSearch(MapComp mapComp){
+    public static void runBreadthFirstSearch(MapComp mapComp, ArrayList<StatusListener<String>> statusListenerList){
         BreadthFirstSearchRunnable runnable = new BreadthFirstSearchRunnable(mapComp);
+        for ( StatusListener<String> statusListener: statusListenerList){
+            runnable.addStatusListener(statusListener);
+        }
         Thread thread = new Thread(runnable);
         mapComp.setAlgoRunnerRunnable(runnable);
         thread.start();
     }
 
-    public static void runDepthFirstSearch(MapComp mapComp){
+    public static void runDepthFirstSearch(MapComp mapComp, ArrayList<StatusListener<String>> statusListenerList){
         DepthFirstSearchRunnable runnable = new DepthFirstSearchRunnable(mapComp);
+        for ( StatusListener<String> statusListener: statusListenerList){
+            runnable.addStatusListener(statusListener);
+        }
         Thread thread = new Thread(runnable);
         mapComp.setAlgoRunnerRunnable(runnable);
         thread.start();
     }
 
-    public static void runAStarSearch(MapComp mapComp){
+    public static void runAStarSearch(MapComp mapComp, ArrayList<StatusListener<String>> statusListenerList){
         A_Star_Runnable runnable = new A_Star_Runnable(mapComp);
+        for ( StatusListener<String> statusListener: statusListenerList){
+            runnable.addStatusListener(statusListener);
+        }
         Thread thread = new Thread(runnable);
         mapComp.setAlgoRunnerRunnable(runnable);
         thread.start();

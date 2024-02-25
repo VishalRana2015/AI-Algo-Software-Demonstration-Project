@@ -7,6 +7,8 @@ public class BestFirstSearchRunnable extends AlgoRunnerRunnableImpl {
 
     @Override
     public void run() {
+        String prefix = "Best First Search: ";
+        updateStatus(prefix + "Starting ...");
         // Nodes created and initialized
         boolean[][] visited = new boolean[mapComp.getRows()][mapComp.getCols()];
         int sourceRow, sourceColumn, destinationRow, destinationColumn;
@@ -26,6 +28,7 @@ public class BestFirstSearchRunnable extends AlgoRunnerRunnableImpl {
         PriorityQueue<Node> openQueue = new PriorityQueue<>(nodeManhattanComparator);
         openQueue.add(new Node(sourceRow, sourceColumn));
         visited[sourceRow][sourceColumn] = false; // 1 stands for to be processed, 2 stands for has been processed, 0 stands for not considered to be processed yet.
+        updateStatus(prefix + "In Progress ...");
         while (!openQueue.isEmpty() && !exit) {
             Node currentNode = openQueue.remove();
             if (visited[currentNode.getRow()][currentNode.getCol()]) {
@@ -45,6 +48,7 @@ public class BestFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                     index++;
                 }
                 mapComp.setPath(rowarray, colarray);
+                updateStatus(prefix + "Destination found, path length: " + rowarray.length);
                 return;
             }
             HashSet<Node> neighbourSet = getNeighbours(currentNode);  // It never returns an obstacle as a neighbour cell.
@@ -70,5 +74,6 @@ public class BestFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                 System.out.println("Exception caught :" + e.getMessage());
             }
         }
+        updateStatus(prefix + "Path not found");
     }
 }

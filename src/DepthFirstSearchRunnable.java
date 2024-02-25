@@ -8,6 +8,8 @@ public class DepthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
 
     @Override
     public void run() {
+        String prefix = "DFS";
+        updateStatus(prefix + "Starting ...");
         int rows, cols;
         rows = mapComp.getRows();
         cols = mapComp.getCols();
@@ -20,6 +22,7 @@ public class DepthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
         Stack<Node> openStack = new Stack<>();
         openStack.add(new Node(sourceCellRow, sourceCellColumn));
         // 1- to be processed, 2 - processed , 0- not even considered for processing
+        updateStatus(prefix + "In Progress ...");
         while (!openStack.isEmpty() && !exit) {
             Node currentNode = openStack.pop();
             if (visited[currentNode.getRow()][currentNode.getCol()]) {
@@ -39,6 +42,7 @@ public class DepthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                     index++;
                 }
                 mapComp.setPath(rowarray, colarray);
+                updateStatus(prefix + "Destination found, path length: " + rowarray.length);
                 return;
             }
             HashSet<Node> neighbours = getNeighbours(currentNode);
@@ -64,7 +68,7 @@ public class DepthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
                 System.out.println("Exception caught :" + e.getMessage());
             }
         }
-
+        updateStatus(prefix + "Path not found");
     }
 
 

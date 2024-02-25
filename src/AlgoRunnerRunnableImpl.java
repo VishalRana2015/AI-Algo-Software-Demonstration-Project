@@ -1,10 +1,8 @@
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
-public abstract class AlgoRunnerRunnableImpl implements AlgoRunnerRunnable{
+public abstract class AlgoRunnerRunnableImpl implements AlgoRunnerRunnable {
     boolean exit;
+    private ArrayList<StatusListener<String>> statusListenerList;
 
 
     @Override
@@ -19,16 +17,29 @@ public abstract class AlgoRunnerRunnableImpl implements AlgoRunnerRunnable{
 
 
     MapComp mapComp;
-    AlgoRunnerRunnableImpl(MapComp comp){
+
+    AlgoRunnerRunnableImpl(MapComp comp) {
         this.mapComp = comp;
         this.exit = false;
+        statusListenerList = new ArrayList<>();
     }
 
-    public HashSet<Node> getNeighbours(Node currentNode){
-        if ( mapComp.isFourDir()){
+    @Override
+    public void addStatusListener(StatusListener<String> statusListener) {
+        statusListenerList.add(statusListener);
+    }
+
+    public HashSet<Node> getNeighbours(Node currentNode) {
+        if (mapComp.isFourDir()) {
             return moveGen4Neighbour(currentNode);
         }
         return moveGen8Neighbour(currentNode);
+    }
+
+    public void updateStatus(String message) {
+        for (StatusListener<String> statusListener : statusListenerList) {
+            statusListener.updateStatus(message);
+        }
     }
 
 
@@ -88,7 +99,7 @@ public abstract class AlgoRunnerRunnableImpl implements AlgoRunnerRunnable{
         return set;
     }
 
-    protected void addCell(Node currentNode, int nrow, int ncol, LinkedHashSet<Node> set){
+    protected void addCell(Node currentNode, int nrow, int ncol, LinkedHashSet<Node> set) {
         Node nn = new Node(nrow, ncol);
         nn.setParent(currentNode);
         nn.setDistance(currentNode.getDistance() + 1);

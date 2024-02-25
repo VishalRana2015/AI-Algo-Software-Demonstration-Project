@@ -66,6 +66,7 @@ public class MapComp extends JComponent implements Cloneable {
     HashSet<Cell> openset = new HashSet<Cell>();
     HashSet<Cell> closedset = new HashSet<Cell>();
     HashSet<Cell> pathset = new HashSet<Cell>();
+    ArrayList<StatusListener<? extends Object>> statusListenerList ;
     private int indent;
     MapCompLayoutManager manager;
     AlgoRunnerRunnable algoRunnerRunnable;
@@ -84,6 +85,11 @@ public class MapComp extends JComponent implements Cloneable {
         this.setDim(rows, cols);
         this.addMouseListener(listener);
         this.fourDir = true;
+        statusListenerList = new ArrayList<>();
+    }
+
+    public void addStatusListener(StatusListener<? extends Object> statusListener){
+        statusListenerList.add(statusListener);
     }
 
     public void setFourDir(boolean fourDir){
