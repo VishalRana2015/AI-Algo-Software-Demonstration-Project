@@ -33,16 +33,16 @@ public class A_Star_Runnable extends AlgoRunnerRunnableImpl {
             return value1 - value2;
         };
 
-        Comparator<Node> node8DirComparator = (Node n1, Node n2 ) ->{
+        Comparator<Node> node8DirComparator = (Node n1, Node n2) -> {
             int rowDistance1 = Math.abs(n1.getRow() - destinationRow), columnDistance1 = Math.abs(n1.getCol() - destinationColumn);
-            int rowDistance2 = Math.abs(n1.getRow() - destinationRow), columnDistance2 = Math.abs(n1.getCol() - destinationColumn);
-            int nodeDistance1 = (rowDistance1 >columnDistance1)?rowDistance1:columnDistance1;
-            int nodeDistance2 = (rowDistance2 > columnDistance2)?rowDistance2:columnDistance2;
-            return nodeDistance1-nodeDistance2;
+            int rowDistance2 = Math.abs(n2.getRow() - destinationRow), columnDistance2 = Math.abs(n2.getCol() - destinationColumn);
+            int nodeDistance1 = (rowDistance1 > columnDistance1) ? rowDistance1 : columnDistance1;
+            int nodeDistance2 = (rowDistance2 > columnDistance2) ? rowDistance2 : columnDistance2;
+            return nodeDistance1 - nodeDistance2;
         };
 
         mapComp.clear();
-        PriorityQueue<Node> openQueue = new PriorityQueue<>( (mapComp.isFourDir())?nodeManhattanComparator:node8DirComparator);
+        PriorityQueue<Node> openQueue = new PriorityQueue<>((mapComp.isFourDir()) ? nodeManhattanComparator : node8DirComparator);
         Node startingNode = new Node(sourceRow, sourceColumn);
         openQueue.add(startingNode);
         startingNode.setDistance(0);
