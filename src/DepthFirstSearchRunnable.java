@@ -8,7 +8,7 @@ public class DepthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
 
     @Override
     public void run() {
-        String prefix = "DFS";
+        String prefix = "DFS: ";
         updateStatus(prefix + "Starting ...");
         int rows, cols;
         rows = mapComp.getRows();

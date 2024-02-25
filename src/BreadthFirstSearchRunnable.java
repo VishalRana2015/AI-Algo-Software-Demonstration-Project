@@ -9,7 +9,7 @@ public class BreadthFirstSearchRunnable extends AlgoRunnerRunnableImpl {
 
     @Override
     public void run() {
-        String prefix = "BFS" ;
+        String prefix = "BFS: " ;
         updateStatus(prefix + "Starting ...");
         // clearing data from the component if any
         mapComp.clear();
