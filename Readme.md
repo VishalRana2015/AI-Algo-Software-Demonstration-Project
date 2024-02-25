@@ -23,7 +23,12 @@ We can also choose a cell to have eight neighbour instead of 4, as shown below. 
 A* Star always find the shortest path to destination.<br/>
 
 <h2>Demonstrating Breadth First Search </h2> <br/>
-![BreadthFirstSearch.gif](images%2FBreadthFirstSearch.gif)
+Breadth First Search always find the shortest path from the Source to the Destination. In the following images, for the given obstacles, it has been shown that the A* has found the shortest path between the source and the destination with path lenght of 43( See Breadth First Serach Image).
+<img width="543" alt="BreachFirstSearch4" src="https://github.com/VishalRana2015/AI-Algo-Software-Demonstration-Project/assets/69715143/5c283590-da18-4fce-bd74-dee6cd794765">
+
+<img width="451" alt="A_Star_4" src="https://github.com/VishalRana2015/AI-Algo-Software-Demonstration-Project/assets/69715143/c16ca94a-324b-4b3b-9b94-a9b7212a1ad8">
+
+
 
 <h2>Demonstrating Best First Search </h2>
 ![BestFirstSearch.gif](images%2FBestFirstSearch.gif)
