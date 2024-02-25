@@ -31,6 +31,22 @@ Breadth First Search always find the shortest path from the Source to the Destin
 
 
 <h2>Demonstrating Best First Search </h2>
-Based on a heuristic function, it picks the best node with lowest heuristic value. Here as the heuristic function, it uses Manhattan distance.<br/>
+Based on a heuristic function, it picks the best node with lowest heuristic value. Here as the heuristic function, it uses Manhattan distance from the evaluating node to the destination.<br/>
 
 <img width="485" alt="BestFirstSearch" src="https://github.com/VishalRana2015/AI-Algo-Software-Demonstration-Project/assets/69715143/74d52ca4-cfd7-4f2f-bc90-6f3c99efea7c">
+
+
+<h3> Controls </h3> 
+
+* Import/Export: You can import and export Grid Map. Create a map with obstacles and export it to use later. Import when you want to use it. It uses <b>.aialgo</b> extension to save files. 
+* Set number of rows and columns in the grid
+* Set cell size
+* Set animation Delay : Default 50 milli seconds.
+* Neighbours: controls to select whether you want adjacent cells sharing edges as neighbors of the current cell or all cells sharing edges and borders as neighbors of the current cell. A neighbor cell is a cell which can be reached from the current cell.
+* Algorithm Selection
+* Edit City Control: To create Grid Map 
+* Play Button: Start playing the selected algorithm on the grid map.
+
+Importing a map Demo<br/>
+<img width="622" alt="Controls" src="https://github.com/VishalRana2015/AI-Algo-Software-Demonstration-Project/assets/69715143/508029af-29b7-475e-be57-64b62491f077">
+
